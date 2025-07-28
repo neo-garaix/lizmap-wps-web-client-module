@@ -1,4 +1,7 @@
-var Petra = function() {
+import {ApiProcess} from "./api/ApiProcess";
+import {ApiJob} from "./api/ApiJob";
+
+var Petra = function () {
 
     var config = null;
     var map = null;
@@ -12,128 +15,203 @@ var Petra = function() {
     var intervalStatusProcesses = null;
     let displayedProcesses = {};
 
-    const PROCESSES_SERVER = "http://localhost:9092";   //TODO: MODIFIER
-    const MAP_SERVER = "http://localhost:9091";         //TODO: MODIFIER
+    let PROCESSES_SERVER = "http://localhost:9092";   //TODO: MODIFIER
+    let MAP_SERVER = "http://localhost:9091";         //TODO: MODIFIER
 
     const processingSvgIcon = 'data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMjQgMjQiIHdpZHRoPSIxNiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJtMTEuMTU4IDEuNS0uODAzIDIuMjM0LjAxMi4xMy4zOSAxLjk0LTIuMjYuOTM0LTEuMDk1LTEuNjQ2LS4wODQtLjA5OC0yLjE0OC0xLjAxNC0xLjE5IDEuMTkgMS4wMTQgMi4xNDguMDk4LjA4NCAxLjY0NiAxLjA5Ni0uOTM1IDIuMjU4LTEuOTQtLjM5LS4xMy0uMDEtMi4yMzMuODAydjEuNjg0bDIuMjM0LjgwMy4xMy0uMDEyIDEuOTQtLjM5LjkzNCAyLjI2LTEuNjQ2IDEuMDk1LS4wOTguMDg0LTEuMDE0IDIuMTQ4IDEuMTkgMS4xOSAyLjE0OC0xLjAxNC4wODQtLjA5OCAxLjA5Ni0xLjY0NiAyLjI1OC45MzUtLjM5IDEuOTQtLjAxLjEzLjgwMiAyLjIzM2gxLjY4NGwuODAzLTIuMjM0LS4wMTItLjEzLS4zOS0xLjk0IDIuMjYtLjkzNCAxLjA5NSAxLjY0Ni4wODQuMDk4IDIuMTQ4IDEuMDE0IDEuMTktMS4xOS0xLjAxNC0yLjE0OC0uMDk4LS4wODQtMS42NDYtMS4wOTYuOTM1LTIuMjU4IDEuOTQuMzkuMTMuMDEgMi4yMzMtLjgwMnYtMS42ODRsLTIuMjM0LS44MDMtLjEzLjAxMi0xLjk0LjM5LS45MzQtMi4yNiAxLjY0Ni0xLjA5NS4wOTgtLjA4NCAxLjAxNC0yLjE0OC0xLjE5LTEuMTktMi4xNDggMS4wMTQtLjA4NC4wOTgtMS4wOTYgMS42NDYtMi4yNTgtLjkzNS4zOS0xLjk0LjAxLS4xMy0uODAyLTIuMjMzem0uODQyIDhhMi41IDIuNSAwIDAgMSAyLjUgMi41IDIuNSAyLjUgMCAwIDEgLTIuNSAyLjUgMi41IDIuNSAwIDAgMSAtMi41LTIuNSAyLjUgMi41IDAgMCAxIDIuNS0yLjV6IiBmaWxsPSIjOThiNWQ4IiBzdHJva2U9IiM0NTdhYmUiLz48L3N2Zz4K'
 
+    function assignValues() {
+        ApiProcess.setProccesesUrl(lizWpsUrls['wps_ogc_processes']);
+        ApiJob.setJobUrl(lizWpsUrls['wps_ogc_jobs']);
+    }
+
     // using OpenLayers.Format.WPSCapabilities to read the capabilities
     function getCapabilities() {
+
+        assignValues();
+
+        /*
+        const TEST_VAL = "PROC";    // PROC or JOB
+
+        if (TEST_VAL === "PROC") {
+            ApiProcess.getAllProcesses()
+                .then((json) => {
+                        console.log("ALL PROC", json);
+                    }
+                );
+
+            ApiProcess.getSpecificProcess("model:centroides")
+                .then((json) => {
+                        console.log("SPECIFIC PROC", json);
+                    }
+                );
+
+            ApiProcess.executeProcess("model:centroides", "test_france_parts/france_parts.qgs", "{ \"inputs\": { \"input\": \"france_parts tuilé en cache\",\"native:centroids_1:OUTPUT\": \"k\"}}")
+                .then(
+                    answer => answer.json()
+                )
+                .then((json) => {
+                        console.log("RESPONSE EXEC", json);
+                    }
+                );
+        } else {
+            const JOB_ID = "ac6a403b-5b2a-11f0-938f-23f8c18b8f49";
+
+            ApiJob.getAllJobs()
+                .then((json) => {
+                        console.log("ALL JOBS", json);
+                    }
+                );
+
+            ApiJob.getSpecificJob(JOB_ID)
+                .then((json) => {
+                        console.log("SPECIFIC JOB", json);
+                    }
+                );
+
+            ApiJob.getResultOfSpecificJob(JOB_ID)
+                .then(
+                    answer => answer.json()
+                )
+                .then((json) => {
+                        console.log("RES JOB", json);
+                    }
+                );
+
+                ApiJob.deleteSpecificJob(JOB_ID)
+                    .then(() => {
+                        ApiJob.getAllJobs()
+                            .then(
+                                answer => answer.json()
+                            )
+                            .then((json) => {
+                                    console.log("ALL JOBS AFTER DELETE", json);
+                                }
+                            );
+                    })
+        }
+        */
+
+        MAP_SERVER = mapURL;
+        console.log(lizWpsUrls);
         OpenLayers.Request.GET({
             url: lizWpsUrls['wps_wps'],
             params: {
                 "SERVICE": "WPS",
                 "REQUEST": "GetCapabilities"
             },
-            success: function(response){
-                console.log(lizWpsUrls);
+            success: function (response) {
+                console.log(mapURL);
                 //TODO: Vérifier nouveaux models
                 fetch(
+                    lizWpsUrls["wps_ogc_processes"]
+                    /*
                     PROCESSES_SERVER +
                     "/processes/"
+                     */
                 )
                     .then(
-                    answer => answer.json()
-                )
+                        answer => answer.json()
+                    )
                     .then((json) => {
 
-                    var dropdown = document.getElementById("processing-processes");
-                    var processingLogList = document.getElementById("processing-log-list");
-                    var processingResultsList = document.getElementById("processing-results-list");
+                        var dropdown = document.getElementById("processing-processes");
+                        var processingLogList = document.getElementById("processing-log-list");
+                        var processingResultsList = document.getElementById("processing-results-list");
 
-                    for (let a in json.processes) {
-                        // Remove alg if not set in wps_wps_project_config
-                        /*
-                        if (
-                            typeof wps_wps_project_config !== 'undefined'
-                            && !(json.processes[a].id in wps_wps_project_config)
-                        ) {
-                            continue;
+                        for (let a in json.processes) {
+                            // Remove alg if not set in wps_wps_project_config
+                            /*
+                            if (
+                                typeof wps_wps_project_config !== 'undefined'
+                                && !(json.processes[a].id in wps_wps_project_config)
+                            ) {
+                                continue;
+                            }
+                             */
+
+                            const processTitle = json.processes[a].title;
+                            const processId = json.processes[a].id;
+
+                            // Dropdown
+                            option = document.createElement("option");
+                            option.innerHTML = processTitle;
+                            option.value = processId;
+                            dropdown.appendChild(option);
+
+                            // List
+                            const li = document.createElement("li");
+                            li.innerHTML = '<span class="title">' + processTitle + '</span>';
+                            li.dataset.value = processId;
+                            const resultsTable = document.createElement("table");
+                            resultsTable.classList = "processing-log-list-results table table-condensed table-striped";
+                            li.appendChild(resultsTable);
+                            processingLogList.appendChild(li);
+
+                            // Div results
+                            // The algorithm div
+                            const div = document.createElement("div");
+                            div.innerHTML = '<h4 class="title">' + processTitle + '</h4>';
+                            div.dataset.value = processId;
+                            div.style = 'display:none;';
+                            processingResultsList.appendChild(div);
+                            // The details div
+                            const divDetails = document.createElement("div");
+                            divDetails.classList = "processing-results-detail";
+                            divDetails.style = 'display:none;';
+                            divDetails.innerHTML = '<h4>Inputs</h4><table class="processing-results-detail-table table table-condensed table-striped"><tbody><tr><th>Name</th><th>Type</th></tr></tbody></table>';
+                            div.appendChild(divDetails);
+                            // The literals div
+                            const divLiterals = document.createElement("div");
+                            divLiterals.classList = "processing-results-literal";
+                            divLiterals.style = 'display:none;';
+                            divLiterals.innerHTML = '<h4>Literal output</h4><table class="processing-results-literal-table table table-condensed table-striped"><tbody><tr><th>Name</th></tr></tbody></table>';
+                            div.appendChild(divLiterals);
+                            // The layers div
+                            const divLayers = document.createElement("div");
+                            divLayers.classList = "processing-results-layer";
+                            divLayers.innerHTML = '<h4>Layers output</h4><table class="processing-results-layer-table table table-condensed table-striped"><tbody><tr><th>Name</th></tr></tbody></table>';
+                            divLayers.style = 'display:none;';
+                            div.appendChild(divLayers);
+                            // The layers div
+                            const divFiles = document.createElement("div");
+                            divFiles.classList = "processing-results-file";
+                            divFiles.innerHTML = '<h4>Files output</h4><table class="processing-results-file-table table table-condensed table-striped"><tbody><tr><th>Name</th></tr></tbody></table>';
+                            divFiles.style = 'display:none;';
+                            div.appendChild(divFiles);
+                            // The plots div
+                            const divPlots = document.createElement("div");
+                            divPlots.classList = "processing-results-plot";
+                            divPlots.innerHTML = '<h4>Plots output</h4><div class="processing-results-plot-table"></div>';
+                            divPlots.style = 'display:none;';
+                            div.appendChild(divPlots);
+                            div.appendChild(document.createElement("hr"));
                         }
-                         */
 
-                        const processTitle = json.processes[a].title;
-                        const processId = json.processes[a].id;
+                        if (dropdown.children.length === 1) {
+                            // No algorithm available
+                            // hide WPS
+                            document.querySelectorAll('#mapmenu ul.nav-list li.processing')[0].style.display = 'none';
+                            document.querySelectorAll('#mapmenu ul.nav-list li.processing-results')[0].style.display = 'none';
+                        } else {
+                            // Algorithms available
+                            // Add toggle behaviour to processing-log-list
+                            for (const li of document.querySelectorAll('#processing-log-list > li .title')) {
+                                li.addEventListener('click', e => {
+                                    const liClicked = e.target.parentElement;
+                                    liClicked.classList.toggle('expanded');
 
-                        // Dropdown
-                        option = document.createElement("option");
-                        option.innerHTML = processTitle;
-                        option.value = processId;
-                        dropdown.appendChild(option);
-
-                        // List
-                        const li = document.createElement("li");
-                        li.innerHTML = '<span class="title">' + processTitle + '</span>';
-                        li.dataset.value = processId;
-                        const resultsTable = document.createElement("table");
-                        resultsTable.classList = "processing-log-list-results table table-condensed table-striped";
-                        li.appendChild(resultsTable);
-                        processingLogList.appendChild(li);
-
-                        // Div results
-                        // The algorithm div
-                        const div = document.createElement("div");
-                        div.innerHTML = '<h4 class="title">' + processTitle + '</h4>';
-                        div.dataset.value = processId;
-                        div.style = 'display:none;';
-                        processingResultsList.appendChild(div);
-                        // The details div
-                        const divDetails = document.createElement("div");
-                        divDetails.classList = "processing-results-detail";
-                        divDetails.style = 'display:none;';
-                        divDetails.innerHTML = '<h4>Inputs</h4><table class="processing-results-detail-table table table-condensed table-striped"><tbody><tr><th>Name</th><th>Type</th></tr></tbody></table>';
-                        div.appendChild(divDetails);
-                        // The literals div
-                        const divLiterals = document.createElement("div");
-                        divLiterals.classList = "processing-results-literal";
-                        divLiterals.style = 'display:none;';
-                        divLiterals.innerHTML = '<h4>Literal output</h4><table class="processing-results-literal-table table table-condensed table-striped"><tbody><tr><th>Name</th></tr></tbody></table>';
-                        div.appendChild(divLiterals);
-                        // The layers div
-                        const divLayers = document.createElement("div");
-                        divLayers.classList = "processing-results-layer";
-                        divLayers.innerHTML = '<h4>Layers output</h4><table class="processing-results-layer-table table table-condensed table-striped"><tbody><tr><th>Name</th></tr></tbody></table>';
-                        divLayers.style = 'display:none;';
-                        div.appendChild(divLayers);
-                        // The layers div
-                        const divFiles = document.createElement("div");
-                        divFiles.classList = "processing-results-file";
-                        divFiles.innerHTML = '<h4>Files output</h4><table class="processing-results-file-table table table-condensed table-striped"><tbody><tr><th>Name</th></tr></tbody></table>';
-                        divFiles.style = 'display:none;';
-                        div.appendChild(divFiles);
-                        // The plots div
-                        const divPlots = document.createElement("div");
-                        divPlots.classList = "processing-results-plot";
-                        divPlots.innerHTML = '<h4>Plots output</h4><div class="processing-results-plot-table"></div>';
-                        divPlots.style = 'display:none;';
-                        div.appendChild(divPlots);
-                        div.appendChild(document.createElement("hr"));
-                    }
-
-                    if ( dropdown.children.length === 1 ) {
-                        // No algorithm available
-                        // hide WPS
-                        document.querySelectorAll('#mapmenu ul.nav-list li.processing')[0].style.display = 'none';
-                        document.querySelectorAll('#mapmenu ul.nav-list li.processing-results')[0].style.display = 'none';
-                    } else {
-                        // Algorithms available
-                        // Add toggle behaviour to processing-log-list
-                        for (const li of document.querySelectorAll('#processing-log-list > li .title')) {
-                            li.addEventListener('click', e => {
-                                const liClicked = e.target.parentElement;
-                                liClicked.classList.toggle('expanded');
-
-                                // Load and display results
-                                if (liClicked.classList.contains('expanded')) {
-                                    const selection = liClicked.dataset.value;
-                                    if (selection !== '') {
-                                        getStoredResults(selection);
+                                    // Load and display results
+                                    if (liClicked.classList.contains('expanded')) {
+                                        const selection = liClicked.dataset.value;
+                                        if (selection !== '') {
+                                            getStoredResults(selection);
+                                        }
                                     }
-                                }
-                            });
+                                });
+                            }
                         }
-                    }
-                })
+                    })
 
                 capabilities = new OpenLayers.Format.WPSCapabilities().read(
                     response.responseText
@@ -158,7 +236,7 @@ var Petra = function() {
         document.getElementById("processing-form-errors").innerHTML = '';
 
         var selection = this.options[this.selectedIndex].value;
-        if ( selection !== '' ) {
+        if (selection !== '') {
             OpenLayers.Request.GET({
                 url: lizWpsUrls['wps_wps'],
                 params: {
@@ -169,7 +247,7 @@ var Petra = function() {
                     "repository": lizUrls.params.repository,
                     "project": lizUrls.params.project
                 },
-                success: function(response) {
+                success: function (response) {
 
                     console.log("REPOSITORY : ", lizUrls.params.project);
                     console.log("PROJECT : ", lizUrls.params.repository);
@@ -178,7 +256,6 @@ var Petra = function() {
                         response.responseText
                     ).processDescriptions[selection];
                     processesWPS[selection] = OpenLayers.Util.extend({}, processWPS);
-
 
 
                     fetch(
@@ -222,7 +299,7 @@ var Petra = function() {
             "/jobs"
         )
             .then(
-            answer => answer.json()
+                answer => answer.json()
             )
             .then(async (json) => {
                 let listJobFromId = [];
@@ -237,7 +314,9 @@ var Petra = function() {
                 if (listJobFromId.length === 0)
                     return;
 
-                let uuidList = listJobFromId.map((el) => {return el.jobID});
+                let uuidList = listJobFromId.map((el) => {
+                    return el.jobID
+                });
 
                 for (let i = 0; i < uuidList.length; i++) {
                     let executedProcess = listJobFromId[i];
@@ -295,7 +374,8 @@ var Petra = function() {
             url
         )
             .then(
-                response => response.json()
+                response => response.json()        console.log("STORED")
+
             )
             .then(
                 (results) => {
@@ -321,7 +401,7 @@ var Petra = function() {
     // dynamically create a form from the process description
     function buildForm() {
         $("#processing-title").html(processOGC.title);
-        if(processOGC.description != '')
+        if (processOGC.description != '')
             $("#processing-abstract").html(processOGC.description);
         document.getElementById("processing-input").innerHTML = "<h3>Input:</h3>";
         document.getElementById("processing-form-errors").innerHTML = "";
@@ -335,16 +415,18 @@ var Petra = function() {
             outputs = processOGC.outputs,
             sld = "text/xml; subtype=sld/1.0.0",
             input, output;
-        if ( !inputs )
+        if (!inputs)
             inputs = [];
-        if ( !outputs )
+        if (!outputs)
             outputs = [];
 
         Object.keys(inputs).forEach(key => {
             input = inputs[key];
             console.log(input)
             if (input.typeHint === "complexData") {             //TODO: MODIFIER POUR PROCESSES
-                let formats = input.schema.oneOf.map((el) => {return el.contentMediaType});
+                let formats = input.schema.oneOf.map((el) => {
+                    return el.contentMediaType
+                });
                 if (formats.includes("application/vnd.geo+json")) {
                     addGeoJSONInput(input);
                 } else if (formats.includes("application/wkt")) {
@@ -370,7 +452,7 @@ var Petra = function() {
                 supported = false;
             }
             if (input.minOccurs > 0) {
-                var label = document.getElementById("processing-input-"+input.keyName.replaceAll(':', '_')+"-label");
+                var label = document.getElementById("processing-input-" + input.keyName.replaceAll(':', '_') + "-label");
                 label.classList.add('jforms-required');
                 var span = document.createElement('span');
                 span.classList.add('jforms-required-star');
@@ -379,21 +461,20 @@ var Petra = function() {
             }
             // inputs table
             var tr = '<tr>';
-            tr += '<td>'+input.title+'</td>';
+            tr += '<td>' + input.title + '</td>';
             if (input.typeHint === "boundingboxData")
                 tr += '<td>Bounding box</td>';
             else if (input.typeHint === "literalData") {
                 var dataType = input.schema.type;
-                if ( 'metadata' in input ) {
+                if ('metadata' in input) {
                     let qgisType = getProcessingTypeFromMetadata(input.metadata);
-                    if ( qgisType === 'number' )
-                        tr += '<td>'+qgisType+' ('+dataType+')</td>';
+                    if (qgisType === 'number')
+                        tr += '<td>' + qgisType + ' (' + dataType + ')</td>';
                     else
-                        tr += '<td>'+qgisType+'</td>';
+                        tr += '<td>' + qgisType + '</td>';
                 } else
-                    tr += '<td>'+dataType+'</td>';
-            }
-            else
+                    tr += '<td>' + dataType + '</td>';
+            } else
                 tr += '<td></td>';
             if (input.minOccurs > 0)
                 // Unicode checkmark
@@ -470,7 +551,7 @@ var Petra = function() {
         }
          */
 
-        $('#processing-input button.wps-digitizing').each(function(){
+        $('#processing-input button.wps-digitizing').each(function () {
             var btn = $(this);
             if (btn.hasClass('extent')) {
                 addDigitizingExtentHandler(btn.attr('id'));
@@ -495,7 +576,7 @@ var Petra = function() {
             output = outputs[key];
             // outputs table
             var tr = '<tr>';
-            tr += '<td>'+output.title+'</td>';
+            tr += '<td>' + output.title + '</td>';
             tr += '<td></td>';
             tr += '</tr>';
             $('#processing-info-outputs tr:last').after(tr);
@@ -540,13 +621,13 @@ var Petra = function() {
         // build the control group
         var control = document.createElement("div");
         control.setAttribute('class', 'control-group');
-        control.id = 'processing-input-'+identifierName+'-group';
+        control.id = 'processing-input-' + identifierName + '-group';
         // defined the label
         var label = document.createElement("label");
         label.setAttribute('class', 'jforms-label control-label');
-        label.setAttribute('for', 'processing-input-'+identifierName);
+        label.setAttribute('for', 'processing-input-' + identifierName);
         label.innerHTML = input.title;
-        label.id = 'processing-input-'+identifierName+'-label';
+        label.id = 'processing-input-' + identifierName + '-label';
         control.appendChild(label);
 
         // defined the field group
@@ -558,23 +639,23 @@ var Petra = function() {
         var field = document.createElement("input");
         field.title = input.title;
         //field.value = "left,bottom,right,top (EPSG:4326)";
-        field.id = 'processing-input-'+identifierName;
+        field.id = 'processing-input-' + identifierName;
         field.name = name;
         field.title = input.title;
         fieldDiv.appendChild(field);
 
         var qgisType = '';
-        if ( 'metadata' in input ) {
+        if ('metadata' in input) {
             qgisType = getProcessingTypeFromMetadata(input.metadata);
         }
 
         // Add simple class
-        var fieldClass = 'qgisType-'+qgisType;
+        var fieldClass = 'qgisType-' + qgisType;
         field.setAttribute('class', fieldClass);
 
         container.appendChild(control);
 
-        addValueHandlers(field, function() {
+        addValueHandlers(field, function () {
             input.data = field.value ? {
                 complexData: {
                     //mimeType: 'application/wkt',
@@ -589,7 +670,7 @@ var Petra = function() {
 
         // Add select for CRS project and map
         var select = document.createElement("select");
-        select.id = 'processing-input-'+identifierName+'-select';
+        select.id = 'processing-input-' + identifierName + '-select';
         select.setAttribute('class', 'span1 wps-digitizing extent');
         var optionProject = document.createElement("option");
         optionProject.value = lizMap.config.options.qgisProjectProjection.ref;
@@ -602,28 +683,34 @@ var Petra = function() {
 
         // Add button to draw the extent
         var btn = document.createElement("button");
-        btn.id = 'processing-input-'+identifierName+'-btn';
-        btn.setAttribute('class', 'btn btn-mini wps-digitizing wkt '+qgisType);
-        btn.innerHTML = 'Drawing '+qgisType;
+        btn.id = 'processing-input-' + identifierName + '-btn';
+        btn.setAttribute('class', 'btn btn-mini wps-digitizing wkt ' + qgisType);
+        btn.innerHTML = 'Drawing ' + qgisType;
 
         $(field).after(btn).after(select).after('<br>');
     }
+
     // helper function to dynamically create a textarea for geometry (WKT) data
     // input
     function addWKTInput(input, previousSibling) {
     }
+
     // input
     function addGMLInput(input, previousSibling) {
     }
+
     // input
     function addGML3Input(input, previousSibling) {
     }
+
     // helper function for xml input
     function addXMLInput(input, type) {
     }
+
     // helper function to dynamically create a WFS collection reference input
     function addWFSCollectionInput(input) {
     }
+
     // helper function to dynamically create a raster (GeoTIFF) url input
     function addRasterInput(input) {
     }
@@ -638,13 +725,13 @@ var Petra = function() {
         // build the control group
         var control = document.createElement("div");
         control.setAttribute('class', 'control-group');
-        control.id = 'processing-input-'+identifierName+'-group';
+        control.id = 'processing-input-' + identifierName + '-group';
         // defined the label
         var label = document.createElement("label");
         label.setAttribute('class', 'jforms-label control-label');
-        label.setAttribute('for', 'processing-input-'+identifierName);
+        label.setAttribute('for', 'processing-input-' + identifierName);
         label.innerHTML = input.title;
-        label.id = 'processing-input-'+identifierName+'-label';
+        label.id = 'processing-input-' + identifierName + '-label';
         control.appendChild(label);
 
         // defined the field group
@@ -656,22 +743,22 @@ var Petra = function() {
         var field = document.createElement("input");
         field.title = input.title;
         field.value = "left,bottom,right,top (EPSG:4326)";
-        field.id = 'processing-input-'+identifierName;
+        field.id = 'processing-input-' + identifierName;
         field.name = name;
         field.title = input.title;
         fieldDiv.appendChild(field);
 
         var qgisType = '';
-        if ( 'metadata' in input ) {
+        if ('metadata' in input) {
             qgisType = getProcessingTypeFromMetadata(input.metadata);
         }
 
         // Add simple class
-        var fieldClass = 'qgisType-'+qgisType;
+        var fieldClass = 'qgisType-' + qgisType;
         field.setAttribute('class', fieldClass);
 
         container.appendChild(control);
-        addValueHandlers(field, function() {
+        addValueHandlers(field, function () {
             // parse field value: number,number,number,number EPSG:integer
             var reg = /(-?\d+\.?\d*) *, *(-?\d+\.?\d*) *, *(-?\d+\.?\d*) *, *(-?\d+\.?\d*) *\((EPSG:\d+)\)/gi;
             var matches = reg.exec(field.value);
@@ -699,7 +786,7 @@ var Petra = function() {
                 }
             };*/
             input.data = {
-                boundingBoxData : {
+                boundingBoxData: {
                     projection: proj,
                     bounds: b
                 }
@@ -708,7 +795,7 @@ var Petra = function() {
 
         // Add select for CRS project and map
         var select = document.createElement("select");
-        select.id = 'processing-input-'+identifierName+'-select';
+        select.id = 'processing-input-' + identifierName + '-select';
         select.setAttribute('class', 'span1 wps-digitizing extent');
         var optionProject = document.createElement("option");
         optionProject.value = lizMap.config.options.qgisProjectProjection.ref;
@@ -721,7 +808,7 @@ var Petra = function() {
 
         // Add button to draw the extent
         var btn = document.createElement("button");
-        btn.id = 'processing-input-'+identifierName+'-btn';
+        btn.id = 'processing-input-' + identifierName + '-btn';
         btn.setAttribute('class', 'btn btn-mini wps-digitizing extent');
         btn.innerHTML = 'Drawing extent';
 
@@ -736,12 +823,12 @@ var Petra = function() {
 
         var control = document.createElement("div");
         control.setAttribute('class', 'control-group');
-        control.id = 'processing-input-'+identifierName+'-group';
+        control.id = 'processing-input-' + identifierName + '-group';
         var label = document.createElement("label");
         label.setAttribute('class', 'jforms-label control-label');
-        label.setAttribute('for', 'processing-input-'+identifierName);
+        label.setAttribute('for', 'processing-input-' + identifierName);
         label.innerHTML = input.title;
-        label.id = 'processing-input-'+identifierName+'-label';
+        label.id = 'processing-input-' + identifierName + '-label';
         control.appendChild(label);
         var fieldDiv = document.createElement("div");
         fieldDiv.setAttribute('class', 'controls');
@@ -753,12 +840,12 @@ var Petra = function() {
         if (input.schema.enum) {
             anyValue = false;
         }
-        if ( dataType === 'boolean' ) {
+        if (dataType === 'boolean') {
             anyValue = false;
-            input.schema.enum = {'False':false,'True':true};
+            input.schema.enum = {'False': false, 'True': true};
         }
         var qgisType = '';
-        if ("metadata" in input ) {
+        if ("metadata" in input) {
             qgisType = getProcessingTypeFromMetadata(input.metadata);
         }
         var defaultValue = '';
@@ -772,27 +859,27 @@ var Petra = function() {
 
         // Restricted layers
         var restrictedLayers = [];
-        if(
+        if (
             typeof wps_wps_project_config !== 'undefined'
             && (processOGC.id in wps_wps_project_config)
             && (name in wps_wps_project_config[processOGC.id])
-        ){
+        ) {
             restrictedLayers = wps_wps_project_config[processOGC.id][name];
-            if ( !$.isArray(restrictedLayers) )
+            if (!$.isArray(restrictedLayers))
                 restrictedLayers = [];
         }
 
         // Get layers list
         var vectors = [];
         var rasters = [];
-        if ( qgisType === 'vector' || qgisType === 'raster' || qgisType === 'source' ) {
-            for ( l in lizMap.config.layers ) {
+        if (qgisType === 'vector' || qgisType === 'raster' || qgisType === 'source') {
+            for (l in lizMap.config.layers) {
                 var lConfig = lizMap.config.layers[l];
-                if ( lConfig.type != 'layer' )
+                if (lConfig.type != 'layer')
                     continue;
-                if ( restrictedLayers.length != 0 && restrictedLayers.indexOf(l) == -1 )
+                if (restrictedLayers.length != 0 && restrictedLayers.indexOf(l) == -1)
                     continue;
-                if ( 'geometryType' in lConfig ) {
+                if ('geometryType' in lConfig) {
                     vectors.push(l);
                 } else {
                     rasters.push(l);
@@ -803,13 +890,13 @@ var Petra = function() {
 
         // anyValue means textfield, otherwise we create a dropdown
         var field = document.createElement((dataType === 'boolean' || (dataType === 'string' && !anyValue) || qgisType === 'field' || qgisType === 'vector' || qgisType === 'raster' || qgisType === 'source') ? "select" : "input");
-        field.id = 'processing-input-'+identifierName;
+        field.id = 'processing-input-' + identifierName;
         field.name = name;
         field.title = input.title;
         fieldDiv.appendChild(field);
 
         // Add simple class
-        var fieldClass = 'qgisType-'+qgisType;
+        var fieldClass = 'qgisType-' + qgisType;
         field.setAttribute('class', fieldClass);
 
         previousSibling && previousSibling.nextSibling ?
@@ -817,12 +904,12 @@ var Petra = function() {
             container.appendChild(control);
 
 //        console.log(name+' "'+dataType+'" "'+qgisType+'" '+(dataType == 'string' && !anyValue)+' '+(qgisType=='source'));
-        if ( qgisType === 'vector' || qgisType === 'source' ) {
+        if (qgisType === 'vector' || qgisType === 'source') {
             var option;
             option = document.createElement("option");
             option.innerHTML = '---';
             field.appendChild(option);
-            for ( var i=0, len=vectors.length; i<len; i++) {
+            for (var i = 0, len = vectors.length; i < len; i++) {
                 var l = vectors[i];
                 var lConfig = lizMap.config.layers[l];
                 option = document.createElement("option");
@@ -830,41 +917,41 @@ var Petra = function() {
                 option.innerHTML = lConfig.title;
                 field.appendChild(option);
             }
-            field.onchange = function() {
+            field.onchange = function () {
                 createCopy(input, field, addLiteralInput);
                 updateQgisFieldInput(input, field);
                 updateSelectFeaturesCheckbox(input, field);
                 var l = this.options[this.selectedIndex].value;
-                input.data = ( !l || l == '' ) ? undefined : {
+                input.data = (!l || l == '') ? undefined : {
                     literalData: {
                         value: l
                     }
                 };
             };
-            if ( qgisType === 'source' ) {
-                $(field).after('<br><label class="checkbox inline disabled"><input id="processing-input-'+identifierName+'-selection" type="checkbox" class="selection" disabled="disabled">Sélection</label>');
-                $(field).parent().find('input[type="checkbox"].selection').change(function(){
+            if (qgisType === 'source') {
+                $(field).after('<br><label class="checkbox inline disabled"><input id="processing-input-' + identifierName + '-selection" type="checkbox" class="selection" disabled="disabled">Sélection</label>');
+                $(field).parent().find('input[type="checkbox"].selection').change(function () {
                     var cbx = $(this);
-                    if ( cbx.is(':checked') ) {
+                    if (cbx.is(':checked')) {
                         cbx.attr('checked', 'checked');
                         var theValue = input.data.literalData.value;
                         var layerName = theValue;
-                        if ( layerName.startsWith('layer:') ) {
+                        if (layerName.startsWith('layer:')) {
                             layerName = layerName.split('?')[0].slice(6);
                         }
                         var layerConfig = lizMap.config.layers[layerName];
-                        if ( ('selectedFeatures' in layerConfig) && layerConfig.selectedFeatures.length > 0 ) {
-                            theValue = 'layer:'+layerName+'?select='+encodeURIComponent('$id IN ( ' + layerConfig.selectedFeatures.join() + ' )')
-                        } else if ( ('filteredFeatures' in layerConfig) && layerConfig.filteredFeatures.length > 0 ) {
-                            theValue = 'layer:'+layerName+'?select='+encodeURIComponent('$id IN ( ' + layerConfig.filteredFeatures.join() + ' )')
-                        } else if ( ('request_params' in layerConfig) &&
-                                    ('exp_filter' in layerConfig['request_params']) &&
-                                    layerConfig['request_params']['exp_filter'] ) {
-                            theValue = 'layer:'+layerName+'?select='+encodeURIComponent(layerConfig['request_params']['exp_filter'])
+                        if (('selectedFeatures' in layerConfig) && layerConfig.selectedFeatures.length > 0) {
+                            theValue = 'layer:' + layerName + '?select=' + encodeURIComponent('$id IN ( ' + layerConfig.selectedFeatures.join() + ' )')
+                        } else if (('filteredFeatures' in layerConfig) && layerConfig.filteredFeatures.length > 0) {
+                            theValue = 'layer:' + layerName + '?select=' + encodeURIComponent('$id IN ( ' + layerConfig.filteredFeatures.join() + ' )')
+                        } else if (('request_params' in layerConfig) &&
+                            ('exp_filter' in layerConfig['request_params']) &&
+                            layerConfig['request_params']['exp_filter']) {
+                            theValue = 'layer:' + layerName + '?select=' + encodeURIComponent(layerConfig['request_params']['exp_filter'])
                         }
                         input.data.literalData.value = theValue;
                     } else {
-                        if ( cbx.attr('checked') != undefined )
+                        if (cbx.attr('checked') != undefined)
                             cbx.removeAttr('checked');
                         var aName = cbx.parent().parent().find('select').val();
                         input.data.literalData.value = aName;
@@ -875,18 +962,18 @@ var Petra = function() {
                 field.selectedIndex = 1;
                 field.onchange();
             }
-        } else if ( qgisType == 'field' ) {
+        } else if (qgisType == 'field') {
             var option;
             option = document.createElement("option");
             option.innerHTML = '---';
             field.appendChild(option);
             fieldClass += ' ';
-            fieldClass += 'fieldParentLayerParameterName-'+input.processMetadata.parentLayerParameterName.replaceAll(':', '_'); // TODO: Modifier
+            fieldClass += 'fieldParentLayerParameterName-' + input.processMetadata.parentLayerParameterName.replaceAll(':', '_'); // TODO: Modifier
             fieldClass += ' ';
             let fieldDataType = getProcessingDataTypeFromMetadata(input.metadata);
-            fieldClass += 'fieldDataType-'+fieldDataType;
+            fieldClass += 'fieldDataType-' + fieldDataType;
             field.setAttribute('class', fieldClass);
-            field.onchange = function() {
+            field.onchange = function () {
                 createCopy(input, field, addLiteralInput);
                 input.data = this.selectedIndex ? {
                     literalData: {
@@ -894,16 +981,16 @@ var Petra = function() {
                     }
                 } : undefined;
             };
-            var parentInput = document.getElementById('processing-input-'+input.processMetadata.parentLayerParameterName.replaceAll(':', '_')); // TODO: Modifier
+            var parentInput = document.getElementById('processing-input-' + input.processMetadata.parentLayerParameterName.replaceAll(':', '_')); // TODO: Modifier
             if (parentInput.value != '') {
                 parentInput.onchange();
             }
-        } else if ( qgisType == 'raster' ) {
+        } else if (qgisType == 'raster') {
             var option;
             option = document.createElement("option");
             option.innerHTML = '---';
             field.appendChild(option);
-            for ( var i=0, len=rasters.length; i<len; i++) {
+            for (var i = 0, len = rasters.length; i < len; i++) {
                 var l = rasters[i];
                 var lConfig = lizMap.config.layers[l];
                 option = document.createElement("option");
@@ -911,7 +998,7 @@ var Petra = function() {
                 option.innerHTML = lConfig.title;
                 field.appendChild(option);
             }
-            field.onchange = function() {
+            field.onchange = function () {
                 createCopy(input, field, addLiteralInput);
                 input.data = this.selectedIndex ? {
                     literalData: {
@@ -923,7 +1010,7 @@ var Petra = function() {
                 field.selectedIndex = 1;
                 field.onchange();
             }
-        } else if ( dataType == 'boolean' ||  (dataType == 'string' && !anyValue) ) {
+        } else if (dataType == 'boolean' || (dataType == 'string' && !anyValue)) {
             var option;
             option = document.createElement("option");
             option.innerHTML = '---';
@@ -935,7 +1022,7 @@ var Petra = function() {
                 option.innerHTML = input.schema.enum[v];
                 field.appendChild(option);
             }
-            field.onchange = function() {
+            field.onchange = function () {
                 createCopy(input, field, addLiteralInput);
                 input.data = this.selectedIndex ? {
                     literalData: {
@@ -943,12 +1030,12 @@ var Petra = function() {
                     }
                 } : undefined;
             };
-            if ( defaultValue ) {
+            if (defaultValue) {
                 $(field).val(defaultValue);
                 field.onchange();
             }
         } else {
-            if ( defaultValue ) {
+            if (defaultValue) {
                 field.value = defaultValue;
                 defaultValue = {
                     literalData: {
@@ -960,7 +1047,7 @@ var Petra = function() {
                 field.value = input.keyName + (dataType ? " (" + dataType + ")" : "");
                 defaultValue = undefined;
             }
-            addValueHandlers(field, function() {
+            addValueHandlers(field, function () {
                 input.data = field.value ? {
                     literalData: {
                         value: field.value
@@ -993,22 +1080,22 @@ var Petra = function() {
 
     function updateSelectFeaturesCheckbox(input, field, fn) {
         var cbx = $(field).parent().find('input[type="checkbox"].selection');
-        if ( cbx.length == 0 )
+        if (cbx.length == 0)
             return;
 
         var aName = $(field).val();
-        if ( !aName || aName == '' )
+        if (!aName || aName == '')
             return;
 
         var lConfig = lizMap.config.layers[aName];
         cbx.attr('disabled', 'disabled');
         cbx.parent().addClass('disabled');
-        if ( cbx.attr('checked') != undefined )
+        if (cbx.attr('checked') != undefined)
             cbx.removeAttr('checked');
 
-        if ( ( ('selectedFeatures' in lConfig) && lConfig.selectedFeatures.length > 0 ) ||
-             ( ('filteredFeatures' in lConfig) && lConfig.filteredFeatures.length > 0 )  ||
-             ( ('request_params' in lConfig) && ('exp_filter' in lConfig['request_params']) && lConfig['request_params']['exp_filter'] ) ) {
+        if ((('selectedFeatures' in lConfig) && lConfig.selectedFeatures.length > 0) ||
+            (('filteredFeatures' in lConfig) && lConfig.filteredFeatures.length > 0) ||
+            (('request_params' in lConfig) && ('exp_filter' in lConfig['request_params']) && lConfig['request_params']['exp_filter'])) {
             cbx.removeAttr('disabled');
             cbx.parent().removeClass('disabled');
         }
@@ -1016,14 +1103,14 @@ var Petra = function() {
     }
 
     function updateQgisFieldInput(input, field, fn) {
-        var qgisFieldInputs = $('#processing-input select.fieldParentLayerParameterName-'+input.keyName.replaceAll(':', '_'));
-        if ( qgisFieldInputs.length == 0 )
+        var qgisFieldInputs = $('#processing-input select.fieldParentLayerParameterName-' + input.keyName.replaceAll(':', '_'));
+        if (qgisFieldInputs.length == 0)
             return;
         var aName = $(field).val();
-        if ( !aName || aName == '' )
+        if (!aName || aName == '')
             return;
         //FIXME: verifying the layerName for featureType
-        qgisFieldInputs.each( function( i, e ) {
+        qgisFieldInputs.each(function (i, e) {
             $(e).children().remove();
             $(e).append('<option>---</option>');
         });
@@ -1031,54 +1118,54 @@ var Petra = function() {
         var identifier = document.getElementById('processing-form-container').dataset.value;
         // Restricted layers
         var restrictedFields = [];
-        if(
+        if (
             typeof wps_wps_project_config !== 'undefined'
             && (identifier in wps_wps_project_config)
         ) {
             var name = qgisFieldInputs[0].name;
             if (name in wps_wps_project_config[identifier]) {
                 restrictedFields = wps_wps_project_config[identifier][name];
-                if ( !$.isArray(restrictedFields) )
+                if (!$.isArray(restrictedFields))
                     restrictedFields = [];
             }
         }
 
         var service = OpenLayers.Util.urlAppend(lizUrls.wms
-            ,OpenLayers.Util.getParameterString(lizUrls.params)
+            , OpenLayers.Util.getParameterString(lizUrls.params)
         );
         $.get(service, {
-            'SERVICE':'WFS'
-            ,'VERSION':'1.0.0'
-            ,'REQUEST':'DescribeFeatureType'
-            ,'TYPENAME':aName
-            ,'OUTPUTFORMAT':'JSON'
-        }, function(describe) {
+            'SERVICE': 'WFS'
+            , 'VERSION': '1.0.0'
+            , 'REQUEST': 'DescribeFeatureType'
+            , 'TYPENAME': aName
+            , 'OUTPUTFORMAT': 'JSON'
+        }, function (describe) {
             //console.log(describe);
             var aliases = describe.aliases;
             var types = {};
             if ('types' in describe)
                 types = describe.types;
-            for ( var att in aliases ) {
-                qgisFieldInputs.each( function( i, e ) {
+            for (var att in aliases) {
+                qgisFieldInputs.each(function (i, e) {
                     var attType = '';
-                    if ( att in types )
+                    if (att in types)
                         attType = types[att];
-                    if ( $(e).hasClass('fieldDataType-DateTime') && attType != 'date' && attType != 'time' && attType != 'dateTime' && attType != '' )
+                    if ($(e).hasClass('fieldDataType-DateTime') && attType != 'date' && attType != 'time' && attType != 'dateTime' && attType != '')
                         return;
-                    if ( $(e).hasClass('fieldDataType-Numeric') && attType != 'integer' && attType != 'long' && attType != 'double' && attType != '' )
+                    if ($(e).hasClass('fieldDataType-Numeric') && attType != 'integer' && attType != 'long' && attType != 'double' && attType != '')
                         return;
-                    if ( $(e).hasClass('fieldDataType-String') && attType != 'string' && attType != 'Date' && attType != '' )
+                    if ($(e).hasClass('fieldDataType-String') && attType != 'string' && attType != 'Date' && attType != '')
                         return;
                     if (restrictedFields.length != 0 && restrictedFields.indexOf(att) == -1)
                         return;
                     var alias = aliases[att];
-                    if ( alias != '' )
-                        $(e).append('<option value="'+att+'">'+alias+'</option>');
+                    if (alias != '')
+                        $(e).append('<option value="' + att + '">' + alias + '</option>');
                     else
-                        $(e).append('<option value="'+att+'">'+att+'</option>');
+                        $(e).append('<option value="' + att + '">' + att + '</option>');
                 });
             }
-            qgisFieldInputs.each( function( i, e ) {
+            qgisFieldInputs.each(function (i, e) {
                 if (e.children.length == 2) {
                     e.selectedIndex = 1;
                 }
@@ -1095,7 +1182,7 @@ var Petra = function() {
               $('body').css('cursor', 'auto');
               */
 
-        },'json');
+        }, 'json');
     }
 
     // if maxOccurs is > 1, this will add a copy of the field
@@ -1113,13 +1200,13 @@ var Petra = function() {
 
     // helper function for adding events to form fields
     function addValueHandlers(field, onblur) {
-        field.onclick = function() {
+        field.onclick = function () {
             if (!this.initialValue) {
                 this.initialValue = this.value;
                 this.value = "";
             }
         };
-        field.onblur = function() {
+        field.onblur = function () {
             if (!this.value) {
                 this.value = this.initialValue;
                 delete this.initialValue;
@@ -1130,9 +1217,9 @@ var Petra = function() {
 
     function addDigitizingExtentHandler(btnId) {
         var btn = document.getElementById(btnId);
-        btn.onclick = function() {
+        btn.onclick = function () {
             var self = $(btn);
-            if ( self.hasClass('active') ) {
+            if (self.hasClass('active')) {
                 lizMap.mainLizmap.digitizing.toolSelected = 'deactivate';
                 $(btn).removeClass('active');
             } else {
@@ -1145,9 +1232,9 @@ var Petra = function() {
 
     function addDigitizingPointHandler(btnId) {
         var btn = document.getElementById(btnId);
-        btn.onclick = function() {
+        btn.onclick = function () {
             var self = $(btn);
-            if ( self.hasClass('active') ) {
+            if (self.hasClass('active')) {
                 lizMap.mainLizmap.digitizing.toolSelected = 'deactivate';
                 $(btn).removeClass('active');
             } else {
@@ -1187,11 +1274,11 @@ var Petra = function() {
         var select = btn.previousSibling;
         var feat = lizMap.mainLizmap.digitizing.featureDrawn.at(-1);
         feat.set('text', select.title);
-        btn.parentElement.firstChild.value = '{ "geometry": '+
+        btn.parentElement.firstChild.value = '{ "geometry": ' +
             (new lizMap.ol.format.GeoJSON()).writeGeometry(
                 feat.getGeometry(),
-                {featureProjection: lizMap.mainLizmap.projection, dataProjection:select.value}
-            )+',  "crs": { "type": "name", "properties": { "name": "'+select.value+'" } } }';
+                {featureProjection: lizMap.mainLizmap.projection, dataProjection: select.value}
+            ) + ',  "crs": { "type": "name", "properties": { "name": "' + select.value + '" } } }';
         btn.parentElement.firstChild.onblur();
         if (lizMap.mainLizmap.digitizing.featureDrawn.length > 1) {
             lizMap.mainLizmap.digitizing._eraseFeature(lizMap.mainLizmap.digitizing.featureDrawn.at(0));
@@ -1206,7 +1293,7 @@ var Petra = function() {
         //var output = process.processOutputs[0];
         var inputs = theProcess.inputs,
             input;
-        if ( !inputs )
+        if (!inputs)
             inputs = theProcess.inputs = [];
 
         Object.keys(inputs).forEach(key => {
@@ -1215,32 +1302,32 @@ var Petra = function() {
                 OpenLayers.Util.removeItem(inputs, input);
                 return;
             }
-            if ( !('metadata' in input )) {
+            if (!('metadata' in input)) {
                 return;
             }
             var qgisType = '';
-            if ( 'metadata' in input ) {
+            if ('metadata' in input) {
                 getProcessingTypeFromMetadata(input.metadata);
             }
-            if ( qgisType == 'source' ) {
+            if (qgisType == 'source') {
                 var theValue = input.data.literalData.value;
                 var layerName = theValue;
-                if ( layerName.startsWith('layer:') ) {
+                if (layerName.startsWith('layer:')) {
                     layerName = layerName.split('?')[0].slice(6);
                 }
                 var layerConfig = lizMap.config.layers[layerName];
-                if ( ('filteredFeatures' in layerConfig) && layerConfig.filteredFeatures.length > 0 ) {
-                    theValue = 'layer:'+layerName+'?select='+encodeURIComponent('$id IN ( ' + layerConfig.filteredFeatures.join() + ' )')
-                } else if ( ('request_params' in layerConfig) &&
+                if (('filteredFeatures' in layerConfig) && layerConfig.filteredFeatures.length > 0) {
+                    theValue = 'layer:' + layerName + '?select=' + encodeURIComponent('$id IN ( ' + layerConfig.filteredFeatures.join() + ' )')
+                } else if (('request_params' in layerConfig) &&
                     ('exp_filter' in layerConfig['request_params']) &&
-                    layerConfig['request_params']['exp_filter'] ) {
-                    theValue = 'layer:'+layerName+'?select='+encodeURIComponent(layerConfig['request_params']['exp_filter'])
+                    layerConfig['request_params']['exp_filter']) {
+                    theValue = 'layer:' + layerName + '?select=' + encodeURIComponent(layerConfig['request_params']['exp_filter'])
                 }
                 var inputName = input.keyName;
-                var cbx = $('#processing-input-'+inputName.replaceAll(':', '_').replaceAll(' ', '_')+'-selection');
-                if ( cbx.is(':checked') ) {
-                    if ( ('selectedFeatures' in layerConfig) && layerConfig.selectedFeatures.length > 0 ) {
-                        theValue = 'layer:'+layerName+'?select='+encodeURIComponent('$id IN ( ' + layerConfig.selectedFeatures.join() + ' )')
+                var cbx = $('#processing-input-' + inputName.replaceAll(':', '_').replaceAll(' ', '_') + '-selection');
+                if (cbx.is(':checked')) {
+                    if (('selectedFeatures' in layerConfig) && layerConfig.selectedFeatures.length > 0) {
+                        theValue = 'layer:' + layerName + '?select=' + encodeURIComponent('$id IN ( ' + layerConfig.selectedFeatures.join() + ' )')
                     }
                 }
                 input.data.literalData.value = theValue;
@@ -1323,10 +1410,10 @@ var Petra = function() {
             var output = {
                 identifier: key
             }
-            if ( processOutput.typeHint === "complexData" ) {
-                output.asReference = true;
-            }
-            outputs.push( output );
+            //if (processOutput.typeHint === "complexData") {
+            //    output.asReference = true;
+            //}
+            outputs.push(output);
         });
 
         theProcess.responseForm = {
@@ -1351,7 +1438,7 @@ var Petra = function() {
             if (element === null) {
                 data += "ERROR,";
             } else {
-                if ( element[0] !== "{") {
+                if (element[0] !== "{") {
                     data += `"` + theProcess.inputs[key].keyName + `": "` + element + `",`;
                 } else {
                     data += `"` + theProcess.inputs[key].keyName + `": ` + element + `,`;
@@ -1371,16 +1458,16 @@ var Petra = function() {
             "test_france_parts/" +   // TODO: Modifier
             lizUrls.params.project +
             ".qgs", {
-            method: "POST",
-            body: data
-        })
+                method: "POST",
+                body: data
+            })
             .then(response => {
-            if (!response.ok) {
-                console.log(response)
-                throw new Error(`HTTP error : ${response.status}`);
-            }
-            return response.json();
-        })
+                if (!response.ok) {
+                    console.log(response)
+                    throw new Error(`HTTP error : ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 console.log("data : ", data)
 
@@ -1410,18 +1497,18 @@ var Petra = function() {
                 console.error(error);
             });
 
-                /*
-                OpenLayers.Request.POST({
-                    url: lizWpsUrls['wps_wps'],
-                    params: lizUrls.params,
-                    data: data,
-                    success: function(response) {
-                        showOutput(theProcess, response, requestTime);
+        /*
+        OpenLayers.Request.POST({
+            url: lizWpsUrls['wps_wps'],
+            params: lizUrls.params,
+            data: data,
+            success: function(response) {
+                showOutput(theProcess, response, requestTime);
 
-                    },
-                    failure: function() {}
-                });
-                 */
+            },
+            failure: function() {}
+        });
+         */
 
         return false;
     }
@@ -1498,16 +1585,16 @@ var Petra = function() {
         }
     }
 
-    function loadConfigAndDisplayPlot( id, url ) {
+    function loadConfigAndDisplayPlot(id, url) {
         $.getJSON(url,
             {},
-            function(json){
-                if( 'errors' in json ){
+            function (json) {
+                if ('errors' in json) {
                     console.error('Dataviz configuration error');
                     console.error(json.errors);
                     return false;
                 }
-                if( !json.data || json.data.length < 1)
+                if (!json.data || json.data.length < 1)
                     return null;
 
                 var plot = lizDataviz.buildPlot(id, json);
@@ -1515,10 +1602,10 @@ var Petra = function() {
         );
     }
 
-    function toggleProcessFailedMessages( uuid ) {
+    function toggleProcessFailedMessages(uuid) {
         var processExecuted = executedProcesses[uuid];
 
-        var btn = $('#log-'+uuid).find('button[value="failed-'+uuid+'"].checkbox');
+        var btn = $('#log-' + uuid).find('button[value="failed-' + uuid + '"].checkbox');
 
         var logFailedUuid = $('#processing-log-failed-uuid');
         var oldUuid = logFailedUuid.text();
@@ -1531,7 +1618,7 @@ var Petra = function() {
         $('#processing-log-failed-title').html('');
 
         // close
-        if ( uuid == oldUuid ) {
+        if (uuid == oldUuid) {
             $('#processing-log-failed').hide();
             logFailedUuid.html('');
             btn.removeClass('checked');
@@ -1539,7 +1626,7 @@ var Petra = function() {
         }
 
         // unique checked
-        $('#log-'+oldUuid).find('button[value="failed-'+oldUuid+'"]').removeClass('checked');
+        $('#log-' + oldUuid).find('button[value="failed-' + oldUuid + '"]').removeClass('checked');
         btn.addClass('checked');
 
         // Update information
@@ -1549,14 +1636,14 @@ var Petra = function() {
 
         $('#processing-log-failed-creation').html((new Date(processExecuted.startTime)).toLocaleString());
 
-        for (var i=0,ii=processExecuted.dataInputs.length; i<ii; ++i) {
+        for (var i = 0, ii = processExecuted.dataInputs.length; i < ii; ++i) {
             var input = processExecuted.dataInputs[i];
-            var tr = '<tr class="wps-input" data-value="'+input.identifier+'">';
-            tr += '<td>'+input.title+'</td>';
+            var tr = '<tr class="wps-input" data-value="' + input.identifier + '">';
+            tr += '<td>' + input.title + '</td>';
             tr += '<td>';
-            if ( input.data && input.data.literalData) {
+            if (input.data && input.data.literalData) {
                 tr += input.data.literalData.value;
-            } else if ( input.data && input.data.complexData) {
+            } else if (input.data && input.data.complexData) {
                 tr += input.data.complexData.value;
             } else {
                 tr += 'Not set';
@@ -1568,31 +1655,31 @@ var Petra = function() {
 
         $('#processing-log-failed-messages').html('');
         var div = '<div class="alert alert-error">';
-        div+= '<ul>';
-        for ( var i=0, ii=processExecuted.exceptions.length; i<ii; i++ ) {
-            div+= '<li>'+processExecuted.exceptions[i]+'</li>';
+        div += '<ul>';
+        for (var i = 0, ii = processExecuted.exceptions.length; i < ii; i++) {
+            div += '<li>' + processExecuted.exceptions[i] + '</li>';
         }
-        div+= '</ul>';
-        div+= '</div>';
+        div += '</ul>';
+        div += '</div>';
         $('#processing-log-failed-messages').html(div);
         $('#processing-log-failed').show();
     }
 
-    function toggleProcessResults( uuid ) {
+    function toggleProcessResults(uuid) {
         var processExecuted = executedProcesses[uuid];
 
         // Get the process button
-        var btn = $('#log-'+uuid).find('button[value="results-'+uuid+'"].checkbox');
+        var btn = $('#log-' + uuid).find('button[value="results-' + uuid + '"].checkbox');
 
         // Show results
         $('#processing-results-list').show();
 
         // Get algorithm results div
-        var divResults = $('#processing-results-list div[data-value="'+processExecuted.jobID+'"]');
+        var divResults = $('#processing-results-list div[data-value="' + processExecuted.jobID + '"]');
         // And show it
         divResults.show();
         btn.addClass('checked');
-        if ( document.getElementById("check-" + uuid).checked ) {
+        if (document.getElementById("check-" + uuid).checked) {
             displayedProcesses[uuid] = true;
             // No process results are displayed
 
@@ -1600,26 +1687,25 @@ var Petra = function() {
             // Add input description
             if (processExecuted.dataInputs) {
                 if (divResults.find('table.processing-results-detail-table tr').length == 1) {
-                    for (var i=0,ii=processExecuted.dataInputs.length; i<ii; ++i) {
+                    for (var i = 0, ii = processExecuted.dataInputs.length; i < ii; ++i) {
                         var input = processExecuted.dataInputs[i];
                         //console.log(input);
                         // details table
-                        var tr = '<tr data-value="'+input.identifier+'">';
-                        tr += '<td>'+input.title+'</td>';
+                        var tr = '<tr data-value="' + input.identifier + '">';
+                        tr += '<td>' + input.title + '</td>';
                         if (input.boundingBoxData)
                             tr += '<td>Bounding box</td>';
                         else if (input.literalData) {
                             var dataType = input.literalData.dataType;
-                            if ( 'processMetadata' in input ) {
+                            if ('processMetadata' in input) {
                                 var qgisType = input.processMetadata.type;
-                                if ( qgisType == 'number' )
-                                    tr += '<td>'+qgisType+' ('+dataType+')</td>';
+                                if (qgisType == 'number')
+                                    tr += '<td>' + qgisType + ' (' + dataType + ')</td>';
                                 else
-                                    tr += '<td>'+qgisType+'</td>';
+                                    tr += '<td>' + qgisType + '</td>';
                             } else
-                                tr += '<td>'+dataType+'</td>';
-                        }
-                        else
+                                tr += '<td>' + dataType + '</td>';
+                        } else
                             tr += '<td></td>';
                         tr += '</tr>';
                         divResults.find('table.processing-results-detail-table tr:last').after(tr);
@@ -1628,27 +1714,27 @@ var Petra = function() {
                 // Add process inputs
                 // First the header
                 divResults.find('table.processing-results-detail-table tr:first th:last')
-                    .after('<th class="'+uuid+'">'+(new Date(processExecuted.startTime)).toLocaleString()+'</th>');
+                    .after('<th class="' + uuid + '">' + (new Date(processExecuted.startTime)).toLocaleString() + '</th>');
                 // Then the data
-                for (var i=0,ii=processExecuted.dataInputs.length; i<ii; ++i) {
+                for (var i = 0, ii = processExecuted.dataInputs.length; i < ii; ++i) {
                     var input = processExecuted.dataInputs[i];
-                    var td = '<td class="'+uuid+'">';
+                    var td = '<td class="' + uuid + '">';
                     //console.log(input);
                     if (input.boundingBoxData && input.data && input.data.boundingBoxData) {
                         var bbValue = input.data.boundingBoxData.bounds;
-                        td += bbValue.left+', '+bbValue.bottom+', '+bbValue.right+', '+bbValue.top+' ('+input.data.boundingBoxData.projection+')';
+                        td += bbValue.left + ', ' + bbValue.bottom + ', ' + bbValue.right + ', ' + bbValue.top + ' (' + input.data.boundingBoxData.projection + ')';
                     } else if (input.boundingBoxData && input.data && input.data.literalData) {
                         var bbValue = input.data.literalData.value;
-                        td += bbValue.left+', '+bbValue.bottom+', '+bbValue.right+', '+bbValue.top;
-                    } else if ( input.data && input.data.complexData) {
+                        td += bbValue.left + ', ' + bbValue.bottom + ', ' + bbValue.right + ', ' + bbValue.top;
+                    } else if (input.data && input.data.complexData) {
                         td += input.data.complexData.value;
-                    } else if ( input.data && input.data.literalData) {
+                    } else if (input.data && input.data.literalData) {
                         td += input.data.literalData.value;
                     } else {
                         td += 'Not set';
                     }
                     td += '</td>';
-                    divResults.find('table.processing-results-detail-table tr[data-value="'+input.identifier+'"] td:last').after(td);
+                    divResults.find('table.processing-results-detail-table tr[data-value="' + input.identifier + '"] td:last').after(td);
                     hasDetail = true;
                 }
             }
@@ -1674,7 +1760,7 @@ var Petra = function() {
             // Add process literal results
             // First the header
             divResults.find('table.processing-results-literal-table tr:first th:last')
-                .after('<th class="'+uuid+'">'+(new Date(processExecuted.created)).toLocaleString()+'</th>');
+                .after('<th class="' + uuid + '">' + (new Date(processExecuted.created)).toLocaleString() + '</th>');
             // Then the data
             /*
             for (var i=0,ii=processExecuted.processOutputs.length; i<ii; ++i) {
@@ -1696,13 +1782,13 @@ var Petra = function() {
             var hasLayer = false;
             // Add layer output description
             if (divResults.find('table.processing-results-layer-table tr').length == 1) {
-                for (var i=0,ii=allResults.length; i<ii; ++i) {
+                for (var i = 0, ii = allResults.length; i < ii; ++i) {
                     var output = allResults[i];
-                    if ( !output.reference )
+                    if (!output.reference)
                         continue;
-                    if ( !output.reference.mimeType )
+                    if (!output.reference.mimeType)
                         continue;
-                    if ( output.reference.mimeType != 'application/x-ogc-wms' )
+                    if (output.reference.mimeType != 'application/x-ogc-wms')
                         continue;
                     // Check layer parameter
                     var url = output.reference.href;
@@ -1710,8 +1796,8 @@ var Petra = function() {
                     var layerParam = getQueryParam(url, 'layer') || getQueryParam(url, 'layers');
                     if (layerParam == undefined)
                         continue;
-                    var tr = '<tr data-value="'+output.identifier+'">';
-                    tr += '<td>'+output.title+'</td>';
+                    var tr = '<tr data-value="' + output.identifier + '">';
+                    tr += '<td>' + output.title + '</td>';
                     tr += '</tr>';
                     divResults.find('table.processing-results-layer-table tr:last').after(tr);
                 }
@@ -1719,15 +1805,15 @@ var Petra = function() {
             // Add process layer results
             // First the header
             divResults.find('table.processing-results-layer-table tr:first th:last')
-                .after('<th class="'+uuid+'">'+(new Date(processExecuted.created)).toLocaleString()+'</th>');
+                .after('<th class="' + uuid + '">' + (new Date(processExecuted.created)).toLocaleString() + '</th>');
             // Then the data
-            for (var i=0,ii=allResults.length; i<ii; ++i) {
+            for (var i = 0, ii = allResults.length; i < ii; ++i) {
                 var output = allResults[i];
-                if ( !output.reference )
+                if (!output.reference)
                     continue;
-                if ( !output.reference.mimeType )
+                if (!output.reference.mimeType)
                     continue;
-                if ( output.reference.mimeType != 'application/x-ogc-wms' )
+                if (output.reference.mimeType != 'application/x-ogc-wms')
                     continue;
                 var url = output.reference.href;
                 // Extract map parameter
@@ -1737,7 +1823,7 @@ var Petra = function() {
                 if (layerParam == undefined)
                     continue;
                 // Create a layer name for the map
-                var layerName = uuid+'-'+output.identifier.replaceAll(':', '_').replaceAll(' ', '_');
+                var layerName = uuid + '-' + output.identifier.replaceAll(':', '_').replaceAll(' ', '_');
 //                console.log(layerName);
 
                 // Create the base url
@@ -1749,18 +1835,18 @@ var Petra = function() {
 
                 // Defined WMS layer parameters
                 var layerWmsParams = {
-                    version:'1.3.0'
-                    ,layers: layerParam
-                    ,styles:''
-                    ,crs:(map.getProjection() != 'EPSG:900913') ? map.getProjection() : 'EPSG:3857'
-                    ,format:'image/png'
-                    ,transparent:'true'
-                    ,exceptions:'application/vnd.ogc.se_inimage'
-                    ,dpi:96
+                    version: '1.3.0'
+                    , layers: layerParam
+                    , styles: ''
+                    , crs: (map.getProjection() != 'EPSG:900913') ? map.getProjection() : 'EPSG:3857'
+                    , format: 'image/png'
+                    , transparent: 'true'
+                    , exceptions: 'application/vnd.ogc.se_inimage'
+                    , dpi: 96
                 };
 
                 let listID = processExecuted.processID.split(":");
-                const wmsTitle = listID[listID.length-1];
+                const wmsTitle = listID[listID.length - 1];
                 console.log("SERVICE URL : ", serviceUrl);
                 // Create OpenLayers WMS layer
                 const wmsLayer = new lizMap.ol.layer.Image({
@@ -1772,7 +1858,7 @@ var Petra = function() {
                     }),
                     properties: {
                         wpsLayerName: layerName,
-                        wmsTitle: wmsTitle+' '+layerParam,
+                        wmsTitle: wmsTitle + ' ' + layerParam,
                     }
                 });
                 if (extGroupMapState === null) {
@@ -1781,15 +1867,15 @@ var Petra = function() {
                 const extLayer = extGroupMapState.addOlLayer(layerName, wmsLayer);
                 extLayer.icon = processingSvgIcon;
 
-                            // Insert layer info in table layer results
-                var td = '<td class="'+uuid+'">';
+                // Insert layer info in table layer results
+                var td = '<td class="' + uuid + '">';
                 //td += '<button class="btn checkbox checked layerView" value="'+layerName+'" title="'+layerParam+'"></button>';
-                td += '<span>'+layerParam+'</span>'
-                td += '<button style="display:none;" class="btn btn-mini layerDownload" value="'+layerName+'" title="'+layerParam+'">';
+                td += '<span>' + layerParam + '</span>'
+                td += '<button style="display:none;" class="btn btn-mini layerDownload" value="' + layerName + '" title="' + layerParam + '">';
                 td += '<i class="icon-download-alt"></i>';
                 td += '</button>';
                 td += '</td>';
-                divResults.find('table.processing-results-layer-table tr[data-value="'+output.identifier+'"] td:last').after(td);
+                divResults.find('table.processing-results-layer-table tr[data-value="' + output.identifier + '"] td:last').after(td);
 
                 hasLayer = true;
 
@@ -1822,9 +1908,9 @@ var Petra = function() {
                 legendParamsString = OpenLayers.Util.urlAppend(serviceUrl, legendParamsString);
             }
 
-            $('#processing-results-layer-table tr td[class="'+uuid+'"] button.layerView').click(function() {
+            $('#processing-results-layer-table tr td[class="' + uuid + '"] button.layerView').click(function () {
                 var btn = $(this);
-                if ( btn.hasClass('checked') ) {
+                if (btn.hasClass('checked')) {
                     btn.removeClass('checked');
                     lizMap.map.getLayersByName(btn.val())[0].setVisibility(false);
                 } else {
@@ -1833,12 +1919,12 @@ var Petra = function() {
                 }
                 return false;
             });
-            divResults.find('table.processing-results-layer-table tr td[class="'+uuid+'"] button.layerDownload').click(function() {
+            divResults.find('table.processing-results-layer-table tr td[class="' + uuid + '"] button.layerDownload').click(function () {
                 var btn = $(this);
                 var btnVal = btn.val();
                 var processUuid = btn.parent().attr('class');
                 var outputName = btn.parent().parent().attr('class');
-                if ( btnVal == processUuid+'-'+outputName ) {
+                if (btnVal == processUuid + '-' + outputName) {
                     // FIXME
                 }
                 return false;
@@ -1851,16 +1937,16 @@ var Petra = function() {
             var hasFile = false;
             // Add layer output description
             if (divResults.find('table.processing-results-file-table tr').length == 1) {
-                for (var i=0,ii=allResults.length; i<ii; ++i) {
+                for (var i = 0, ii = allResults.length; i < ii; ++i) {
                     var output = allResults[i];
-                    if ( !output.reference )
+                    if (!output.reference)
                         continue;
-                    if ( !output.reference.mimeType )
+                    if (!output.reference.mimeType)
                         continue;
-                    if ( output.reference.mimeType == 'application/x-ogc-wms' )
+                    if (output.reference.mimeType == 'application/x-ogc-wms')
                         continue;
-                    var tr = '<tr data-value="'+output.identifier+'">';
-                    tr += '<td>'+output.title+'</td>';
+                    var tr = '<tr data-value="' + output.identifier + '">';
+                    tr += '<td>' + output.title + '</td>';
                     tr += '</tr>';
                     divResults.find('table.processing-results-file-table tr:last').after(tr);
                 }
@@ -1868,9 +1954,9 @@ var Petra = function() {
             // Add process file results
             // First the header
             divResults.find('table.processing-results-file-table tr:first th:last')
-                .after('<th class="'+uuid+'">'+(new Date(processExecuted.created)).toLocaleString()+'</th>');
+                .after('<th class="' + uuid + '">' + (new Date(processExecuted.created)).toLocaleString() + '</th>');
             // Then the data
-            for (var i=0,ii=allResults.length; i<ii; ++i) {
+            for (var i = 0, ii = allResults.length; i < ii; ++i) {
                 var output = allResults[i];
                 if (!output.reference)
                     continue;
@@ -1904,25 +1990,25 @@ var Petra = function() {
             // PLOTS
             // Display plots
             var hasPlot = false;
-            var div = '<div class="processing-results-plot-display" data-value="'+uuid+'">';
-            div+= '<h5>'+(new Date(processExecuted.created)).toLocaleString()+'</h5>';
-            div+= '</div>';
+            var div = '<div class="processing-results-plot-display" data-value="' + uuid + '">';
+            div += '<h5>' + (new Date(processExecuted.created)).toLocaleString() + '</h5>';
+            div += '</div>';
             divResults.find('div.processing-results-plot-table').append(div);
             // for each plot output create a plotly display
-            for (var i=0,ii=allResults.length; i<ii; ++i) {
+            for (var i = 0, ii = allResults.length; i < ii; ++i) {
                 var output = allResults[i];
-                if ( !output.reference )
+                if (!output.reference)
                     continue;
-                if ( !output.reference.mimeType )
+                if (!output.reference.mimeType)
                     continue;
-                if ( output.reference.mimeType != 'application/json' )
+                if (output.reference.mimeType != 'application/json')
                     continue;
                 var url = output.reference.href;
-                var oDiv = '<p><strong>'+output.title+'</strong></p>';
-                oDiv += '<div id="'+uuid+'-'+output.identifier.replaceAll(':', '_').replaceAll(' ', '_')+'" style="height:400px;">';
+                var oDiv = '<p><strong>' + output.title + '</strong></p>';
+                oDiv += '<div id="' + uuid + '-' + output.identifier.replaceAll(':', '_').replaceAll(' ', '_') + '" style="height:400px;">';
                 oDiv += '</div>';
-                divResults.find('div.processing-results-plot div[data-value="'+uuid+'"]').append(oDiv);
-                loadConfigAndDisplayPlot( uuid+'-'+output.identifier.replaceAll(':', '_').replaceAll(' ', '_'), url );
+                divResults.find('div.processing-results-plot div[data-value="' + uuid + '"]').append(oDiv);
+                loadConfigAndDisplayPlot(uuid + '-' + output.identifier.replaceAll(':', '_').replaceAll(' ', '_'), url);
                 hasPlot = true;
             }
             // Hide or show content depending on results
@@ -1931,7 +2017,7 @@ var Petra = function() {
             displayedProcesses[uuid] = false;
             // Remove displayed results
             // Remove plot div
-            divResults.find('div.processing-results-plot-table > div[data-value="'+uuid+'"]').remove();
+            divResults.find('div.processing-results-plot-table > div[data-value="' + uuid + '"]').remove();
             // Hide or show content depending on results
             var hasPlot = (divResults.find('div.processing-results-plot-table > div').length != 0);
             if (!hasPlot) {
@@ -1955,8 +2041,8 @@ var Petra = function() {
                 if ( layers.length > 0 )
                     lizMap.map.removeLayer( layers[0] );
             });*/
-            divResults.find('table.processing-results-layer-table tr td[class="'+uuid+'"]').remove();
-            divResults.find('table.processing-results-layer-table tr th[class="'+uuid+'"]').remove();
+            divResults.find('table.processing-results-layer-table tr td[class="' + uuid + '"]').remove();
+            divResults.find('table.processing-results-layer-table tr th[class="' + uuid + '"]').remove();
             // Hide or show content depending on results
             var hasLayer = (divResults.find('table.processing-results-layer-table tr th').length != 1);
             if (!hasLayer) {
@@ -1964,8 +2050,8 @@ var Petra = function() {
             }
 
             // Remove file outputs
-            divResults.find('table.processing-results-file-table tr td[class="'+uuid+'"]').remove();
-            divResults.find('table.processing-results-file-table tr th[class="'+uuid+'"]').remove();
+            divResults.find('table.processing-results-file-table tr td[class="' + uuid + '"]').remove();
+            divResults.find('table.processing-results-file-table tr th[class="' + uuid + '"]').remove();
             // Hide or show content depending on results
             var hasLiteral = (divResults.find('table.processing-results-file-table tr th').length != 1);
             if (!hasLiteral) {
@@ -1973,8 +2059,8 @@ var Petra = function() {
             }
 
             // Remove literal outputs
-            divResults.find('table.processing-results-literal-table tr td[class="'+uuid+'"]').remove();
-            divResults.find('table.processing-results-literal-table tr th[class="'+uuid+'"]').remove();
+            divResults.find('table.processing-results-literal-table tr td[class="' + uuid + '"]').remove();
+            divResults.find('table.processing-results-literal-table tr th[class="' + uuid + '"]').remove();
             // Hide or show content depending on results
             var hasLiteral = (divResults.find('table.processing-results-literal-table tr th').length != 1);
             if (!hasLiteral) {
@@ -1982,8 +2068,8 @@ var Petra = function() {
             }
 
             // Remove inputs
-            divResults.find('table.processing-results-detail-table tr td[class="'+uuid+'"]').remove();
-            divResults.find('table.processing-results-detail-table tr th[class="'+uuid+'"]').remove();
+            divResults.find('table.processing-results-detail-table tr td[class="' + uuid + '"]').remove();
+            divResults.find('table.processing-results-detail-table tr th[class="' + uuid + '"]').remove();
             // Hide or show content depending on results
             var hasDetail = (divResults.find('table.processing-results-detail-table tr th').length != 2);
             if (!hasDetail) {
@@ -1998,7 +2084,7 @@ var Petra = function() {
         }
 
         // open dock
-        if ( !$('#button-processing-results').parent().hasClass('active') )
+        if (!$('#button-processing-results').parent().hasClass('active'))
             $('#button-processing-results').click();
 
         refreshPlotsWidth();
@@ -2026,11 +2112,11 @@ var Petra = function() {
         }
     }
 
-    function updateLogTable( executedProcess ) {
-        if ( !executedProcess ) {
+    function updateLogTable(executedProcess) {
+        if (!executedProcess) {
             return;
         }
-        if ( !executedProcess.jobID ) {
+        if (!executedProcess.jobID) {
             return;
         }
 
@@ -2041,14 +2127,13 @@ var Petra = function() {
 
         const shortUUID = uuid.substring(0, 13);
 
-        let tr = '<tr id="log-'+uuid+'" data-value="'+startTime+'">';
+        let tr = '<tr id="log-' + uuid + '" data-value="' + startTime + '">';
 
         // Display actions buttons
         tr += '<td>';
-        if (status === 'successful'){
+        if (status === 'successful') {
             tr += '<input type="checkbox" class="" id="check-' + uuid + '" value="results-' + uuid + '" title="Toggle process results"></input>';
-        }
-        else if (status === 'failed'){
+        } else if (status === 'failed') {
             tr += '<input type="checkbox" class="" id="check-' + uuid + '" value="results-' + uuid + '" title="Toggle process information"></input>';
         }
         tr += '</td>';
@@ -2057,20 +2142,20 @@ var Petra = function() {
         let titleInfo = [];
         let label = '';
         let inputLabel = '';
-        if(
+        if (
             typeof wps_wps_project_config !== 'undefined'
             && (executedProcess.processID in wps_wps_project_config)
             && ('__job_label' in wps_wps_project_config[executedProcess.processID])
-        ){
+        ) {
             inputLabel = wps_wps_project_config[executedProcess.processID]['__job_label'];
         }
         if (executedProcess.dataInputs) {   //TODO: VERIFIER, dataIputs not in processes/jobs/
             Object.keys(executedProcess.dataInputs).forEach((key) => {
                 var input = executedProcess.dataInputs[key];
-                if ( input.data && input.data.literalData) {
+                if (input.data && input.data.literalData) {
                     titleInfo.push(input.data.literalData.value);
                 }
-                if ( inputLabel !== '' && key === inputLabel ) {
+                if (inputLabel !== '' && key === inputLabel) {
                     label = input.data.literalData.value;
                 }
                 let isTypeExisting = false;
@@ -2102,32 +2187,32 @@ var Petra = function() {
 
         // Display start time
         tr += '<td title="' + shortUUID + '">';
-        if (status === 'successful' || status === 'failed'){
+        if (status === 'successful' || status === 'failed') {
             tr += '<label class="" id="label-' + uuid + '" for="check-' + uuid + '" title="' + titleInfo.join(', ') + '"></input>';
         }
         tr += label
         tr += '</label></td>';
 
         // Display status
-        if ( status === 'accepted' || status === 'running' )
+        if (status === 'accepted' || status === 'running')
             tr += '<td><span class="badge badge-info"><i class="icon-white icon-refresh"></i></span></td>';
-        else if ( status === 'successful' )
+        else if (status === 'successful')
             tr += '<td><span class="badge badge-success"><i class="icon-white icon-ok"></i></span></td>';
-        else if ( status === 'failed' )
+        else if (status === 'failed')
             tr += '<td><span class="badge badge-important"><i class="icon-white icon-remove"></i></span></td>';
         else
-            tr += '<td>'+status+'</td>';
+            tr += '<td>' + status + '</td>';
 
         tr += '</tr>';
 
-        var logTr = $('#log-'+uuid);
+        var logTr = $('#log-' + uuid);
         var isChecked = displayedProcesses[uuid];
-        if ( logTr.length === 0 ){
-            logTrList = $('#processing-log-list li[data-value="' + executedProcess.processID + '"] .processing-log-list-results tr');
+        if (logTr.length === 0) {
+            let logTrList = $('#processing-log-list li[data-value="' + executedProcess.processID + '"] .processing-log-list-results tr');
             var keepLogTrListLen = logTrList.length;
 
             // Add the tr in right order
-            logTrList.each(function(idx, elt){
+            logTrList.each(function (idx, elt) {
                 elt = $(elt);
                 if (startTime > elt.attr('data-value')) {
                     elt.before(tr);
@@ -2140,47 +2225,45 @@ var Petra = function() {
             if (newLogTrListLen == keepLogTrListLen) {
                 $('#processing-log-list li[data-value="' + executedProcess.processID + '"] .processing-log-list-results').append(tr);
             }
-        }
-        else {
+        } else {
             logTr.find('input').unbind('click');
             logTr.replaceWith(tr);
         }
 
-        logTr = $('#log-'+uuid);
+        logTr = $('#log-' + uuid);
         if (isChecked) {
             document.getElementById("check-" + uuid).checked = true;
         }
-        logTr.find('input').click(function(){
+        logTr.find('input').click(function () {
             var self = $(this);
             var val = self.val();
             //console.log(val);
             var btnUuid = '';
             var btnAction = '';
-            if ( val.startsWith('results-' ) ) {
+            if (val.startsWith('results-')) {
                 btnUuid = val.replaceAll('results-', '');
                 btnAction = 'results';
-            } else if ( val.startsWith('failed-' ) ) {
+            } else if (val.startsWith('failed-')) {
                 btnUuid = val.replaceAll('failed-', '');
                 btnAction = 'failed';
             }
             //console.log(btnUuid);
-            if ( btnUuid in executedProcesses ) {
+            if (btnUuid in executedProcesses) {
                 var processExecuted = executedProcesses[btnUuid];
                 //console.log( processExecuted );
-                if ( btnAction == 'results' ) {
-                    toggleProcessResults( btnUuid );
-                } else if ( btnAction == 'failed' ) {
-                    toggleProcessFailedMessages( btnUuid );
+                if (btnAction == 'results') {
+                    toggleProcessResults(btnUuid);
+                } else if (btnAction == 'failed') {
+                    toggleProcessFailedMessages(btnUuid);
                 }
 
-            }
-            else
+            } else
                 console.warn('unknown uuid');
         });
     }
 
-    function updateStatusProcess( uuid ) {
-        if ( !(uuid in executedProcesses) )
+    function updateStatusProcess(uuid) {
+        if (!(uuid in executedProcesses))
             return;
         executedProcesses[uuid].reloadStatus = true;
 
@@ -2195,11 +2278,11 @@ var Petra = function() {
             .then(
                 (json) => {
 
-                    var pToSave = parseExecuteResponse( json );
+                    var pToSave = parseExecuteResponse(json);
                     uuid = pToSave.jobID;
 
                     executedProcesses[uuid] = pToSave;
-                    updateLogTable( pToSave );
+                    updateLogTable(pToSave);
                 }
             );
 
@@ -2233,65 +2316,66 @@ var Petra = function() {
     function scheduleUpdateStatusProcesses() {
         // Use closure to track the number of call
         var count = 5
-        intervalStatusProcesses = window.setInterval( function() {
+        intervalStatusProcesses = window.setInterval(function () {
             count -= 1;
             updateStatusProcesses(count)
-        }, 1000 );
+        }, 1000);
     }
 
     function updateStatusProcesses(count) {
         var updated = 0;
-        for ( var uuid in executedProcesses ) {
+        for (var uuid in executedProcesses) {
             var executedProcess = executedProcesses[uuid];
-            if ( executedProcess.reloadStatus )
+            if (executedProcess.reloadStatus)
                 continue;
-            if ( executedProcess.status == 'Failed' || executedProcess.status == 'Succeeded' )
+            if (executedProcess.status == 'Failed' || executedProcess.status == 'Succeeded')
                 continue;
-            updateStatusProcess( uuid );
+            updateStatusProcess(uuid);
             updated += 1;
         }
-        if ( intervalStatusProcesses ) {
-            if( updated == 0 ) {
-                window.clearInterval( intervalStatusProcesses );
+        if (intervalStatusProcesses) {
+            if (updated == 0) {
+                window.clearInterval(intervalStatusProcesses);
                 intervalStatusProcesses = null;
             } else {
                 // Processes still running, slow down
                 // the interval
-                if( count < 0 ) {
-                    window.clearInterval( intervalStatusProcesses );
-                    intervalStatusProcesses = window.setInterval( function() {
-                        updateStatusProcesses(1); }, 10000 );
+                if (count < 0) {
+                    window.clearInterval(intervalStatusProcesses);
+                    intervalStatusProcesses = window.setInterval(function () {
+                        updateStatusProcesses(1);
+                    }, 10000);
                 }
             }
         }
     }
 
-    function parseExecuteResponse( executeResponse, requestTime ) {
+    function parseExecuteResponse(executeResponse, requestTime) {
         //console.log(executeResponse);
         var uuid = executeResponse.jobID;
         var statusCreationTime = executeResponse.created;
 
         var status = 'accepted';
-        if ( executeResponse.status === 'failed' )
+        if (executeResponse.status === 'failed')
             status = 'failed';
-        else if ( executeResponse.status === 'running' )
+        else if (executeResponse.status === 'running')
             status = 'running';
-        else if ( executeResponse.status === 'successful' )
+        else if (executeResponse.status === 'successful')
             status = 'successful';
 
 
         var exceptions = [];
-        if ( status === 'failed' ) {        // TODO : FAILED modifier
-            if ( executeResponse.status.exceptionReport && executeResponse.status.exceptionReport.exceptions ) {
+        if (status === 'failed') {        // TODO : FAILED modifier
+            if (executeResponse.status.exceptionReport && executeResponse.status.exceptionReport.exceptions) {
                 var exceptionList = executeResponse.status.exceptionReport.exceptions;
-                for ( var i = 0, len=exceptionList.length; i < len; i++ ) {
-                    exceptions = exceptions.concat( exceptionList[i].texts );
+                for (var i = 0, len = exceptionList.length; i < len; i++) {
+                    exceptions = exceptions.concat(exceptionList[i].texts);
                 }
             }
         }
 
         var pToSave = null;
-        if ( !(uuid in executedProcesses) ) {
+        if (!(uuid in executedProcesses)) {
             pToSave = executeResponse;
             /*
             pToSave = JSON.parse(JSON.stringify({
@@ -2320,11 +2404,11 @@ var Petra = function() {
         return pToSave;
     }
 
-    function manageExecuteResponse( executeResponse, requestTime ) {
+    function manageExecuteResponse(executeResponse, requestTime) {
         // Display results tab if inactive
         $('li.processing-results:not(.active) #button-processing-results').click();
 
-        var pToSave = parseExecuteResponse( executeResponse, requestTime );
+        var pToSave = parseExecuteResponse(executeResponse, requestTime);
         var uuid = pToSave.jobID;
         console.log(pToSave)
         if (pToSave.hasOwnProperty("links")) {
@@ -2335,8 +2419,8 @@ var Petra = function() {
 
                         executedProcesses[uuid] = pToSave;
 
-                        updateLogTable( pToSave );
-                        updateStatusProcess( uuid );
+                        updateLogTable(pToSave);
+                        updateStatusProcess(uuid);
                         scheduleUpdateStatusProcesses();
                     }
                 )
@@ -2345,18 +2429,18 @@ var Petra = function() {
         }
     }
 
-    function manageExceptionReport( exceptionReport, requestTime ) {
+    function manageExceptionReport(exceptionReport, requestTime) {
         var result = document.getElementById("processing-form-errors");
         var div = '<div class="alert alert-error">';
-        div+= '<ul>';
-        for ( var i=0, ii=exceptionReport.exceptions.length; i<ii; i++ ) {
+        div += '<ul>';
+        for (var i = 0, ii = exceptionReport.exceptions.length; i < ii; i++) {
             var exception = exceptionReport.exceptions[i];
-            for ( var j=0, jj=exception.texts.length; j<jj; j++ ) {
-                div+= '<li>'+exception.texts[j]+'</li>';
+            for (var j = 0, jj = exception.texts.length; j < jj; j++) {
+                div += '<li>' + exception.texts[j] + '</li>';
             }
         }
-        div+= '</ul>';
-        div+= '</div>';
+        div += '</ul>';
+        div += '</div>';
         result.innerHTML = div;
     }
 
@@ -2365,16 +2449,16 @@ var Petra = function() {
         // Display results for executed algorithm if not expanded
         $('#processing-log-list li[data-value="' + theProcess.identifier + '"]:not(.expanded)').addClass('expanded');
 
-        if ( response )
-            manageExecuteResponse( response, requestTime );
-        if ( response.status?.exceptionReport )
-            manageExceptionReport( response, requestTime );
+        if (response)
+            manageExecuteResponse(response, requestTime);
+        if (response.status?.exceptionReport)
+            manageExceptionReport(response, requestTime);
         //result.innerHTML += "<textarea>" + response.responseText + "</textarea>";
     }
 
     lizMap.events.on({
 
-        'uicreated': function(e) {
+        'uicreated': function (e) {
             const processingProcessesElement = document.querySelector('#processing-processes');
             const processingResultsElement = document.querySelector('#processing-results');
             if (processingProcessesElement === null || processingResultsElement === null) {
@@ -2383,7 +2467,7 @@ var Petra = function() {
             config = lizMap.config;
             map = lizMap.map;
 
-            if ( 'wps_wps' in lizWpsUrls && $("#processing-processes").length) {
+            if ('wps_wps' in lizWpsUrls && $("#processing-processes").length) {
                 $('#button-processing span.icon').css('background-image', 'none').html('<i class="icon-cog icon-white" style="margin-left: 4px;"></i>');
 
                 $('#button-processing-results span.icon').css('background-image', 'none').html('<i class="icon-eye-open icon-white" style="margin-left: 4px;"></i>');
@@ -2395,47 +2479,47 @@ var Petra = function() {
             }
 
             OpenLayers.Format.WPSDescribeProcess.prototype.namespaces.xlink = 'http://www.w3.org/1999/xlink';
-            OpenLayers.Format.WPSDescribeProcess.prototype.readers.ows.Metadata = function(node, obj) {
-                if ( !('processMetadata' in obj) )
+            OpenLayers.Format.WPSDescribeProcess.prototype.readers.ows.Metadata = function (node, obj) {
+                if (!('processMetadata' in obj))
                     obj.processMetadata = {};
                 var type = this.getAttributeNS(node, this.namespaces.xlink, "type");
                 var title = this.getAttributeNS(node, this.namespaces.xlink, "title");
                 var href = this.getAttributeNS(node, this.namespaces.xlink, "href");
-                if ( type == 'simple' && title.startsWith('processing:') )
+                if (type == 'simple' && title.startsWith('processing:'))
                     obj.processMetadata[title.slice(11)] = href;
             };
-            OpenLayers.Format.WPSDescribeProcess.prototype.readers.wps.DefaultValue = function(node, literalData) {
+            OpenLayers.Format.WPSDescribeProcess.prototype.readers.wps.DefaultValue = function (node, literalData) {
                 literalData.defaultValue = this.getChildValue(node);
             };
             OpenLayers.Format.WPSExecute.prototype.namespaces.xlink = 'http://www.w3.org/1999/xlink';
-            OpenLayers.Format.WPSExecute.prototype.readers.wps.Reference = function(node, output) {
+            OpenLayers.Format.WPSExecute.prototype.readers.wps.Reference = function (node, output) {
                 output.reference = {
                     href: node.getAttribute("href"),
                     mimeType: node.getAttribute("mimeType"),
                     encoding: node.getAttribute("encoding"),
                     schema: node.getAttribute("schema")
                 };
-                if ( !output.reference.href )
+                if (!output.reference.href)
                     output.reference.href = this.getAttributeNS(node, this.namespaces.xlink, "href");
             };
-            OpenLayers.Format.WPSExecute.prototype.readers.wps.ProcessFailed = function(node,obj) {
+            OpenLayers.Format.WPSExecute.prototype.readers.wps.ProcessFailed = function (node, obj) {
                 obj.processFailed = true;
                 this.readChildNodes(node, obj);
             };
-            OpenLayers.Format.WPSExecute.prototype.readers.wps.ExceptionReport = function(node, obj) {
+            OpenLayers.Format.WPSExecute.prototype.readers.wps.ExceptionReport = function (node, obj) {
                 obj.exceptionReport = {
                     exceptions: []
                 };
                 this.readChildNodes(node, obj.exceptionReport);
             };
-            OpenLayers.Format.WPSExecute.prototype.readers.wps.ProcessAccepted = function(node,obj) {
+            OpenLayers.Format.WPSExecute.prototype.readers.wps.ProcessAccepted = function (node, obj) {
                 obj.processAccepted = true;
             };
-            OpenLayers.Format.WPSExecute.prototype.readers.wps.ProcessStarted = function(node,obj) {
+            OpenLayers.Format.WPSExecute.prototype.readers.wps.ProcessStarted = function (node, obj) {
                 obj.processStarted = true;
                 obj.percentCompleted = node.hasAttribute("percentCompleted") ? node.getAttribute("percentCompleted") : null;
             };
-            OpenLayers.Format.WPSExecute.prototype.readers.wps.ProcessPaused = function(node,obj) {
+            OpenLayers.Format.WPSExecute.prototype.readers.wps.ProcessPaused = function (node, obj) {
                 obj.processPaused = true;
             };
 
@@ -2447,7 +2531,7 @@ var Petra = function() {
             processingResultsObserver.observe(processingResultsElement);
 
             lizMap.events.on({
-                'dockopened': function(e) {
+                'dockopened': function (e) {
                     if (e.id = 'processing') {
                         var options = $("#processing-processes option");
                         if (options.length == 2) {
@@ -2459,16 +2543,16 @@ var Petra = function() {
                     }
                 },
 
-                'layerSelectionChanged': function(e) {
+                'layerSelectionChanged': function (e) {
 
-                    $('#processing-form-container select.qgisType-source').each(function(idx, elt){
+                    $('#processing-form-container select.qgisType-source').each(function (idx, elt) {
                         elt = $(elt);
-                        if ( elt.val() != e.featureType )
+                        if (elt.val() != e.featureType)
                             return;
 
                         var cbx = $(elt).parent().find('input[type="checkbox"].selection');
                         var cbxChecked = false;
-                        if ( cbx.length != 0 ) {
+                        if (cbx.length != 0) {
                             cbxChecked = cbx.is(':checked');
                         }
 
