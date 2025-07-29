@@ -1,5 +1,3 @@
-import {Utils} from "./Utils";
-
 export class BuildHelper {
 
     // *---------------------------------*
@@ -47,7 +45,7 @@ export class BuildHelper {
         field.title = input.title;
         fieldDiv.appendChild(field);
 
-        const qgisType = Utils.getProcessingTypeFromMetadata(input.metadata);
+        const qgisType = input.metadata.find(item => item.title === "processing:type")?.href;
 
         // Add a simple class
         field.setAttribute('class', 'qgisType-' + qgisType);
@@ -172,5 +170,33 @@ export class BuildHelper {
         if (lizMap.mainLizmap.digitizing.featureDrawn.length > 1) {
             lizMap.mainLizmap.digitizing._eraseFeature(lizMap.mainLizmap.digitizing.featureDrawn.at(0));
         }
+    }
+
+    static dispatchInputValueUpdate(processId, inputId, inputValue) {
+        document.dispatchEvent(new CustomEvent('WPSInputValueChanged', {
+            detail: {
+                processId: processId.replaceAll(':','-'),
+                inputId: inputId,
+                newInputValue: inputValue
+            }
+        }));
+    }
+
+    static addError(id, input, text) {
+        document.dispatchEvent(new CustomEvent('WPSAddError', {
+            detail: {
+                id: id,
+                input: input,
+                text: text
+            }
+        }));
+    }
+
+    static removeError(id) {
+        document.dispatchEvent(new CustomEvent('WPSRemoveError', {
+            detail: {
+                id: id
+            }
+        }));
     }
 }

@@ -1,4 +1,3 @@
-import {Utils} from "./Utils";
 import {BuildHelper} from "./BuildHelper";
 
 export class BoundingboxData {
@@ -41,11 +40,11 @@ export class BoundingboxData {
         let matches = reg.exec(field.value);
 
         if (matches === undefined || matches?.length !== 6) {
-            Utils.addError(field.id, input, "value isn't correct.")
-            Utils.dispatchInputValueUpdate(input.processId, id, '');
+            BuildHelper.addError(field.id, input, "value isn't correct.")
+            BuildHelper.dispatchInputValueUpdate(input.processId, id, '');
             return;
         } else {
-            Utils.removeError(field.id);
+            BuildHelper.removeError(field.id);
         }
 
         // get projection value to upper case
@@ -63,7 +62,7 @@ export class BoundingboxData {
             top: b[3]
         }
 
-        Utils.dispatchInputValueUpdate(
+        BuildHelper.dispatchInputValueUpdate(
             input.processId,
             id,
             {

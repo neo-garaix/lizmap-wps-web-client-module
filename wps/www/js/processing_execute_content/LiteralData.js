@@ -1,4 +1,3 @@
-import {Utils} from "./Utils";
 import {BuildHelper} from "./BuildHelper";
 
 export class LiteralData {
@@ -28,7 +27,7 @@ export class LiteralData {
             "enum"
         ];
 
-        const type = Utils.getProcessingTypeFromMetadata(input.metadata);
+        const type = input.metadata.find(item => item.title === "processing:type")?.href;
 
         if (type === 'boolean')
             input.schema.enum = ['False', 'True'];
@@ -45,7 +44,7 @@ export class LiteralData {
 
         if (selectType.includes(type) || enumVal) {
             field.addEventListener("change", (e) => {
-                Utils.dispatchInputValueUpdate(input.processId, id, field.value);
+                BuildHelper.dispatchInputValueUpdate(input.processId, id, field.value);
             });
 
             const restrictedLayers = this.getRestrictedLayers(cleanId, input);
@@ -88,17 +87,18 @@ export class LiteralData {
             });
         }
 
-        Utils.dispatchInputValueUpdate(input.processId, id, field.value);
+        BuildHelper.dispatchInputValueUpdate(input.processId, id, field.value);
 
         return control;
     }
 
     static checkValues(field, inputId,  input, type) {
         if (field.value === '') {
-            Utils.addError(field.id, input, "value is empty.");
+            BuildHelper.addError(field.id, input, "value is empty.");
+            BuildHelper.dispatchInputValueUpdate(input.processId, inputId, '');
             return;
         } else {
-            Utils.removeError(field.id);
+            BuildHelper.removeError(field.id);
         }
 
         if (type === "number") {
@@ -112,17 +112,17 @@ export class LiteralData {
             }
 
             if (!reg.exec(field.value)) {
-                Utils.addError(field.id, input, "value should be " + preciseType + ".");
+                BuildHelper.addError(field.id, input, "value should be " + preciseType + ".");
             } else {
-                Utils.removeError(field.id);
+                BuildHelper.removeError(field.id);
 
                 const min = input.schema.minimum;
                 const max = input.schema.maximum;
 
                 if (parseFloat(field.value) >= min && parseFloat(field.value) <= max) {
-                    Utils.removeError(field.id);
+                    BuildHelper.removeError(field.id);
                 } else {
-                    Utils.addError(
+                    BuildHelper.addError(
                         field.id,
                         input,
                         "value should be between " + min + " and " + max + "."
@@ -131,7 +131,7 @@ export class LiteralData {
             }
         }
 
-        Utils.dispatchInputValueUpdate(input.processId, inputId, field.value);
+        BuildHelper.dispatchInputValueUpdate(input.processId, inputId, field.value);
     }
 
     static handleSourceType(field, id, input) {

@@ -1,4 +1,3 @@
-import {Utils} from "./Utils";
 import {BuildHelper} from "./BuildHelper";
 
 export class ComplexData {
@@ -35,9 +34,9 @@ export class ComplexData {
 
     static checkValues(field, id, input) {
         if (field.value === '') {
-            Utils.addError(field.id, input, "value is empty.")
+            BuildHelper.addError(field.id, input, "value is empty.")
         } else {
-            Utils.removeError(field.id);
+            BuildHelper.removeError(field.id);
         }
         const val = field.value ? {
             complexData: {
@@ -48,6 +47,6 @@ export class ComplexData {
                 value: field.value
             }
         } : '';
-        Utils.dispatchInputValueUpdate(input.processId, id, val);
+        BuildHelper.dispatchInputValueUpdate(input.processId, id, val);
     }
 }
