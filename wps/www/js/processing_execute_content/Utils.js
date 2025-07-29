@@ -1,4 +1,5 @@
 import {Errors} from "./Errors";
+import {FlashMessage} from "../other_components/FlashMessage";
 
 export class Utils {
 
@@ -16,6 +17,25 @@ export class Utils {
 
     static hasError() {
         return Errors.hasError();
+    }
+
+    static resetErrors() {
+        Errors.resetErrors();
+    }
+
+
+    // *----------------*
+    // | Flash messages |
+    // *----------------*
+
+    static addFlashMessage(message, type, closable, duration) {
+        const msg = new FlashMessage(message, type, closable, duration);
+
+        if(duration !== undefined){
+            setTimeout(function() {
+                msg.removeElement();
+            }, duration);
+        }
     }
 
 
@@ -46,7 +66,7 @@ export class Utils {
     static dispatchInputValueUpdate(processId, inputId, inputValue) {
         document.dispatchEvent(new CustomEvent('WPSInputValueChanged', {
             detail: {
-                processId: processId,
+                processId: processId.replaceAll(':','-'),
                 inputId: inputId,
                 newInputValue: inputValue
             }

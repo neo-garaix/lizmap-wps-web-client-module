@@ -1,5 +1,3 @@
-import {ApiJob} from "../api/ApiJob";
-
 export class Job {
 
     constructor(options) {
@@ -35,14 +33,8 @@ export class Job {
         }
     }
 
-    async getResults() {
-        const areResultsUp = this._links[2].href;
-
-        if (!areResultsUp)
-            return undefined;
-
-        return await ApiJob.getResultOfSpecificJob(this._jobID);
-
+    areResultsUp() {
+        return this._links[2].href;
     }
 
     getJobID() {

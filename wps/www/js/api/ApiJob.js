@@ -1,5 +1,5 @@
-import { ApiBasics } from "./ApiBasics";
-import { Job } from "../ogc_elements/Job"
+import {ApiBasics} from "./ApiBasics";
+import {Job} from "../ogc_elements/Job"
 
 export class ApiJob {
 
@@ -10,29 +10,33 @@ export class ApiJob {
      * @returns {Promise<object>}
      */
     static async getAllJobs() {
-        const resp = await ApiBasics.GETMethod(this.JOBS_URL);
-        const json = await resp.json();
+        try {
+            const json = await ApiBasics.GETMethod(this.JOBS_URL);
 
-        let listJob = {};
+            let listJob = {};
 
-        json.jobs.forEach((value) => {
-            listJob[value.jobID] = new Job({
-                created: value.created,
-                started: value.started,
-                expire: value.expire,
-                finished: value.finished,
-                updated: value.updated,
-                jobID: value.jobID,
-                links: value.links,
-                message: value.message,
-                processID: value.processID,
-                progress: value.progress,
-                status: value.status,
-                type: value.type
+            json.jobs.forEach((value) => {
+                listJob[value.jobID] = new Job({
+                    created: value.created,
+                    started: value.started,
+                    expire: value.expire,
+                    finished: value.finished,
+                    updated: value.updated,
+                    jobID: value.jobID,
+                    links: value.links,
+                    message: value.message,
+                    processID: value.processID,
+                    progress: value.progress,
+                    status: value.status,
+                    type: value.type
+                });
             });
-        });
 
-        return listJob;
+            return listJob;
+        } catch (e) {
+            throw e;
+        }
+
     }
 
     /**
@@ -41,25 +45,29 @@ export class ApiJob {
      * @returns {Promise<Job>}
      */
     static async getSpecificJob(jobID) {
-        const url = this.JOBS_URL + '/' + jobID;
+        try {
+            const url = this.JOBS_URL + '/' + jobID;
 
-        const resp = await ApiBasics.GETMethod(url);
-        const json = await resp.json();
+            const json = await ApiBasics.GETMethod(url);
 
-        return new Job({
-            created: json.created,
-            started: json.started,
-            expire: json.expire,
-            finished: json.finished,
-            updated: json.updated,
-            jobID: json.jobID,
-            links: json.links,
-            message: json.message,
-            processID: json.processID,
-            progress: json.progress,
-            status: json.status,
-            type: json.type
-        });
+            return new Job({
+                created: json.created,
+                started: json.started,
+                expire: json.expire,
+                finished: json.finished,
+                updated: json.updated,
+                jobID: json.jobID,
+                links: json.links,
+                message: json.message,
+                processID: json.processID,
+                progress: json.progress,
+                status: json.status,
+                type: json.type
+            });
+        } catch (e) {
+            throw e;
+        }
+
     }
 
     /**
@@ -68,9 +76,13 @@ export class ApiJob {
      * @returns {Promise<Response>}
      */
     static getResultOfSpecificJob(jobID) {
-        const url = this.JOBS_URL + '/' + jobID + '/results';
+        try {
+            const url = this.JOBS_URL + '/' + jobID + '/results';
 
-        return ApiBasics.GETMethod(url);
+            return ApiBasics.GETMethod(url);
+        } catch (e) {
+            throw e;
+        }
     }
 
     /**
@@ -78,10 +90,14 @@ export class ApiJob {
      * @param {string} jobID
      * @returns {Promise<Response>}
      */
-    static deleteSpecificJob(jobID) {
-        const url = this.JOBS_URL + '/' + jobID;
+    static async deleteSpecificJob(jobID) {
+        try {
+            const url = this.JOBS_URL + '/' + jobID;
 
-        return ApiBasics.DELETEMethod(url);
+            return ApiBasics.DELETEMethod(url);
+        } catch (e) {
+            throw e;
+        }
     }
 
     /**
