@@ -1,42 +1,35 @@
-import {BuildHelper} from "./BuildHelper";
+import {ComplexBuildHelper} from "./ComplexBuildHelper";
 
-export class ComplexData {
+export class ComplexData extends ComplexBuildHelper {
 
-    /**
-     *
-     * @param {string} id
-     * @param {object} input
-     * @returns {HTMLElement}
-     */
-    static getInput(id, input) {
-        const values = BuildHelper.partialPartBuilder(
-            id.replaceAll(':', '-'),
-            input
-        );
+    constructor(id, input) {
+        super(id, input);
 
-        const control = values[0];
-        const field = values[1];
-        const selectorCRS = values[2];
-        const btn = values[3];
-
-        field.addEventListener("blur", (e) => {
-            this.checkValues(field, id, input);
+        this.fieldDiv.firstChild.addEventListener("blur", (e) => {
+            this.checkValues(this.fieldDiv.firstChild, id, input);
         });
 
         const br = document.createElement('br');
 
-        field.parentNode.insertBefore(br, field.nextSibling);
-        field.parentNode.insertBefore(selectorCRS, br.nextSibling);
-        field.parentNode.insertBefore(btn, selectorCRS.nextSibling);
-
-        return control;
+        this.fieldDiv.insertBefore(br, this.fieldDiv.nextSibling);
+        this.fieldDiv.insertBefore(this.selectorCRS, br.nextSibling);
+        this.fieldDiv.insertBefore(this.btn, this.selectorCRS.nextSibling);
     }
 
-    static checkValues(field, id, input) {
+
+    /**
+     *
+     * @returns {HTMLElement}
+     */
+    getInput() {
+        return this.control;
+    }
+
+    checkValues(field, id, input) {
         if (field.value === '') {
-            BuildHelper.addError(field.id, input, "value is empty.")
+            this.addError(field.id, input, "value is empty.")
         } else {
-            BuildHelper.removeError(field.id);
+            this.removeError(field.id);
         }
         const val = field.value ? {
             complexData: {
@@ -47,6 +40,6 @@ export class ComplexData {
                 value: field.value
             }
         } : '';
-        BuildHelper.dispatchInputValueUpdate(input.processId, id, val);
+        this.dispatchInputValueUpdate(input.processId, id, val);
     }
 }

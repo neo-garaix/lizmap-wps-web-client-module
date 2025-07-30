@@ -1,50 +1,41 @@
-import {BuildHelper} from "./BuildHelper";
+import {ComplexBuildHelper} from "./ComplexBuildHelper";
 
-export class BoundingboxData {
+export class BoundingboxData extends ComplexBuildHelper {
 
-    /**
-     *
-     * @param {string} id
-     * @param {object} input
-     * @returns {HTMLElement}
-     */
-    static getInput(id, input) {
-        const values = BuildHelper.partialPartBuilder(
-            id.replaceAll(':', '-'),
-            input
-        );
+    constructor(id, input) {
+        super(id, input);
 
-        const control = values[0];
-        const field = values[1];
-        const selectorCRS = values[2];
-        const btn = values[3];
-
-        field.addEventListener("blur", (e) => {
-            this.checkValues(field, id, input);
+        this.fieldDiv.firstChild.addEventListener("blur", (e) => {
+            this.checkValues(this.fieldDiv.firstChild, id, input);
         });
 
-        field.placeholder = "left,bottom,right,top (EPSG:4326)";
+        this.fieldDiv.placeholder = "left,bottom,right,top (EPSG:4326)";
 
         const br = document.createElement('br');
 
-        field.parentNode.insertBefore(br, field.nextSibling);
-        field.parentNode.insertBefore(selectorCRS, br.nextSibling);
-        field.parentNode.insertBefore(btn, selectorCRS.nextSibling);
+        this.fieldDiv.insertBefore(br, this.fieldDiv.nextSibling);
+        this.fieldDiv.insertBefore(this.selectorCRS, br.nextSibling);
+        this.fieldDiv.insertBefore(this.btn, this.selectorCRS.nextSibling);
 
-        return control;
+    }
+    /**
+     * @returns {HTMLElement}
+     */
+    getInput() {
+        return this.control;
     }
 
     // Parse field value: number,number,number,number EPSG:integer
-    static checkValues(field, id, input) {
+    checkValues(field, id, input) {
         let reg = /(-?\d+\.?\d*) *, *(-?\d+\.?\d*) *, *(-?\d+\.?\d*) *, *(-?\d+\.?\d*) *\((EPSG:\d+)\)/gi;
         let matches = reg.exec(field.value);
 
         if (matches === undefined || matches?.length !== 6) {
-            BuildHelper.addError(field.id, input, "value isn't correct.")
-            BuildHelper.dispatchInputValueUpdate(input.processId, id, '');
+            this.addError(field.id, input, "value isn't correct.")
+            this.dispatchInputValueUpdate(input.processId, id, '');
             return;
         } else {
-            BuildHelper.removeError(field.id);
+            this.removeError(field.id);
         }
 
         // get projection value to upper case
@@ -62,7 +53,7 @@ export class BoundingboxData {
             top: b[3]
         }
 
-        BuildHelper.dispatchInputValueUpdate(
+        this.dispatchInputValueUpdate(
             input.processId,
             id,
             {

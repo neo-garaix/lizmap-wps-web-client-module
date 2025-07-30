@@ -1,23 +1,9 @@
 import {BuildHelper} from "./BuildHelper";
 
-export class LiteralData {
+export class LiteralData extends BuildHelper {
 
-    /**
-     *
-     * @param {string} id
-     * @param {object} input
-     * @returns {HTMLElement}
-     */
-    static getInput(id, input) {
-        const cleanId = id.replaceAll(':', '-');
-
-        const values = BuildHelper.firstPartBuilder(
-            cleanId,
-            input.title
-        );
-
-        const control = values[0];
-        const fieldDiv = values[1];
+    constructor(id, input, occurrence) {
+        super(id, input, occurrence);
 
         const selectType = [
             "vector",
@@ -27,6 +13,8 @@ export class LiteralData {
             "enum"
         ];
 
+        const cleanId = id.replaceAll(':', '-');
+
         const type = input.metadata.find(item => item.title === "processing:type")?.href;
 
         if (type === 'boolean')
@@ -35,16 +23,16 @@ export class LiteralData {
         const enumVal = input.schema.enum;
 
         const field = document.createElement(selectType.includes(type) || enumVal ? "select" : "input");
-        field.id = 'processing-input-' + cleanId;
+        field.id = 'processing-input-' + cleanId + '-' + this.occurrence;
         field.name = cleanId;
         field.title = input.title;
-        fieldDiv.appendChild(field);
+        this.fieldDiv.appendChild(field);
 
         field.setAttribute('class', 'qgisType-' + type);
 
         if (selectType.includes(type) || enumVal) {
             field.addEventListener("change", (e) => {
-                BuildHelper.dispatchInputValueUpdate(input.processId, id, field.value);
+                this.dispatchInputValueUpdate(input.processId, id, field.value);
             });
 
             const restrictedLayers = this.getRestrictedLayers(cleanId, input);
@@ -87,18 +75,24 @@ export class LiteralData {
             });
         }
 
-        BuildHelper.dispatchInputValueUpdate(input.processId, id, field.value);
-
-        return control;
+        this.dispatchInputValueUpdate(input.processId, id, field.value);
     }
 
-    static checkValues(field, inputId,  input, type) {
+    /**
+     *
+     * @returns {HTMLElement}
+     */
+    getInput() {
+        return this.control;
+    }
+
+    checkValues(field, inputId,  input, type) {
         if (field.value === '') {
-            BuildHelper.addError(field.id, input, "value is empty.");
-            BuildHelper.dispatchInputValueUpdate(input.processId, inputId, '');
+            this.addError(field.id, input, "value is empty.");
+            this.dispatchInputValueUpdate(input.processId, inputId, '');
             return;
         } else {
-            BuildHelper.removeError(field.id);
+            this.removeError(field.id);
         }
 
         if (type === "number") {
@@ -112,17 +106,17 @@ export class LiteralData {
             }
 
             if (!reg.exec(field.value)) {
-                BuildHelper.addError(field.id, input, "value should be " + preciseType + ".");
+                this.addError(field.id, input, "value should be " + preciseType + ".");
             } else {
-                BuildHelper.removeError(field.id);
+                this.removeError(field.id);
 
                 const min = input.schema.minimum;
                 const max = input.schema.maximum;
 
                 if (parseFloat(field.value) >= min && parseFloat(field.value) <= max) {
-                    BuildHelper.removeError(field.id);
+                    this.removeError(field.id);
                 } else {
-                    BuildHelper.addError(
+                    this.addError(
                         field.id,
                         input,
                         "value should be between " + min + " and " + max + "."
@@ -131,17 +125,17 @@ export class LiteralData {
             }
         }
 
-        BuildHelper.dispatchInputValueUpdate(input.processId, inputId, field.value);
+        this.dispatchInputValueUpdate(input.processId, inputId, field.value);
     }
 
-    static handleSourceType(field, id, input) {
+    handleSourceType(field, id, input) {
         const br = document.createElement('br');
 
         const label = document.createElement("label");
         label.setAttribute("class", "checkbox inline disabled");
 
         const checkBox = document.createElement("input");
-        checkBox.setAttribute("id", 'processing-input-' + id + '-selection');
+        checkBox.setAttribute("id", 'processing-input-' + id + '-selection-' + this.occurrence);
         checkBox.setAttribute("type", "checkbox");
         checkBox.setAttribute("class", 'selection');
         checkBox.disabled = true;
@@ -169,7 +163,7 @@ export class LiteralData {
         field.parentNode.insertBefore(br, field.nextSibling);
     }
 
-    static selectionCheckBoxEvent(id, input, field) {
+    selectionCheckBoxEvent(id, input, field) {
         const docCheckBox = document.getElementById('processing-input-' + id + '-selection');
         if (docCheckBox.checked && !docCheckBox.disabled) {
             let theValue = input.data;
@@ -194,7 +188,7 @@ export class LiteralData {
         }
     }
 
-    static fillSelectField(field, layersList) {
+    fillSelectField(field, layersList) {
         const baseOption = document.createElement("option");
         baseOption.innerHTML = '';
         field.appendChild(baseOption);
@@ -213,7 +207,7 @@ export class LiteralData {
         }
     }
 
-    static getLayersList(type, restrictedLayers) {
+    getLayersList(type, restrictedLayers) {
         let vectorsAndRasters = [[], []];
         if (["vector", "source", "raster"].includes(type)) {
             for (let layer in lizMap.config.layers) {
@@ -232,7 +226,7 @@ export class LiteralData {
         return vectorsAndRasters;
     }
 
-    static getRestrictedLayers(inputId, input) {
+    getRestrictedLayers(inputId, input) {
         let restrictedLayers = [];
         if (
             typeof wps_wps_project_config !== 'undefined'
